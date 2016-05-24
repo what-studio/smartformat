@@ -37,10 +37,18 @@ def plural(formatter, value, name, opts, format):
     return formatter.format(words[index], value)
 
 
-@ext(['choose', 'c'])
-def choose(value, name, opts, format):
-    pass
+@ext(['choose', 'c'], pass_formatter=True)
+def choose(formatter, value, name, opts, format):
+    if not opts:
+        return
+    words = format.split('|')
+    if len(words) < 2:
+        return
+    opts = opts.split('|')
+    key = 'null' if value is None else str(value)
+    index = opts.index(key)
+    return formatter.format(words[index], value)
 
 
 #: The list of default extensions.
-DEFAULT_EXTENSIONS = [plural]
+DEFAULT_EXTENSIONS = [plural, choose]

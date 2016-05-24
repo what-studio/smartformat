@@ -45,15 +45,20 @@ class TestSmartFormatter(TestFormatter):
 
     formatter_class = SmartFormatter
 
+    def assert_formats(self, locale, format_string, expectations=None):
+        if expectations is None:
+            format_string, expectations = locale, format_string
+            locale = None
+        for args, expected in expectations.items():
+            if not isinstance(args, tuple):
+                args = (args,)
+            assert self.format(locale, format_string, *args) == expected
+
 
 class TestPlural(TestSmartFormatter):
 
-    def assert_plural(self, locale, format_string, expectations):
-        for number, expected in expectations.items():
-            assert self.format(locale, format_string, number) == expected
-
     def test_english(self):
-        self.assert_plural('en_US',  # noqa
+        self.assert_formats('en_US',  # noqa
             u'There {0:is|are} {0} {0:item|items} remaining', {
                # -1: u'There are -1 items remaining',
                   0: u'There are 0 items remaining',
@@ -66,14 +71,14 @@ class TestPlural(TestSmartFormatter):
         )
 
     def test_turkish(self):
-        self.assert_plural('tr_TR',  # noqa
+        self.assert_formats('tr_TR',  # noqa
             u'{0} nesne kaldı.', {
                 0: u'0 nesne kaldı.',
                 1: u'1 nesne kaldı.',
                 2: u'2 nesne kaldı.',
             }
         )
-        self.assert_plural('tr',  # noqa
+        self.assert_formats('tr',  # noqa
             u'Seçili {0:nesneyi|nesneleri} silmek istiyor musunuz?', {
                  0: u'Seçili nesneleri silmek istiyor musunuz?',
                  1: u'Seçili nesneyi silmek istiyor musunuz?',
@@ -83,7 +88,7 @@ class TestPlural(TestSmartFormatter):
         )
 
     def test_russian(self):
-        self.assert_plural('ru_RU',  # noqa
+        self.assert_formats('ru_RU',  # noqa
             u'Я купил {0} {0:банан|банана|бананов}.', {
                   0: u'Я купил 0 бананов.',
                   1: u'Я купил 1 банан.',
@@ -104,3 +109,32 @@ class TestPlural(TestSmartFormatter):
         format_string = (u'{0} {0:plural(en):one|many} {0:p(ko):많이} '
                          u'{0:plural(pl):miesiąc|miesiące|miesięcy}')
         assert self.format(None, format_string, 2) == u'2 many 많이 miesiące'
+
+
+class TestChoose(TestSmartFormatter):
+
+    def test_int_str_bool(self):
+        self.assert_formats(u'{0:choose(1|2|3):one|two|three}', {
+            1: u'one',
+            2: u'two',
+            3: u'three',
+        })
+        self.assert_formats(u'{0:choose(3|2|1):three|two|one}', {
+            1: u'one',
+            2: u'two',
+            3: u'three',
+        })
+        self.assert_formats(u'{0:choose(1|2|3):one|two|three}', {
+            u'1': u'one',
+            u'2': u'two',
+            u'3': u'three',
+        })
+        self.assert_formats(u'{0:choose(A|B|C):Alpha|Bravo|Charlie}', {
+            u'A': u'Alpha',
+            u'B': u'Bravo',
+            u'C': u'Charlie',
+        })
+        self.assert_formats(u'{0:choose(True|False):yep|nope}', {
+            True: u'yep',
+            False: u'nope',
+        })
