@@ -44,9 +44,9 @@ def choose(formatter, value, name, opts, format):
     words = format.split('|')
     if len(words) < 2:
         return
-    opts = opts.split('|')
+    choices = opts.split('|')
     key = 'null' if value is None else str(value)
-    index = opts.index(key)
+    index = choices.index(key)
     return formatter.format(words[index], value)
 
 
