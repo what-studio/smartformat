@@ -115,26 +115,17 @@ class TestChoose(TestSmartFormatter):
 
     def test_int_str_bool(self):
         self.assert_formats(u'{0:choose(1|2|3):one|two|three}', {
-            1: u'one',
-            2: u'two',
-            3: u'three',
+            1: u'one', 2: u'two', 3: u'three',
         })
         self.assert_formats(u'{0:choose(3|2|1):three|two|one}', {
-            1: u'one',
-            2: u'two',
-            3: u'three',
+            1: u'one', 2: u'two', 3: u'three',
         })
         self.assert_formats(u'{0:choose(1|2|3):one|two|three}', {
-            u'1': u'one',
-            u'2': u'two',
-            u'3': u'three',
+            u'1': u'one', u'2': u'two', u'3': u'three',
         })
         self.assert_formats(u'{0:choose(A|B|C):Alpha|Bravo|Charlie}', {
-            u'A': u'Alpha',
-            u'B': u'Bravo',
-            u'C': u'Charlie',
+            u'A': u'Alpha', u'B': u'Bravo', u'C': u'Charlie',
         })
         self.assert_formats(u'{0:choose(True|False):yep|nope}', {
-            True: u'yep',
-            False: u'nope',
+            True: u'yep', False: u'nope',
         })
