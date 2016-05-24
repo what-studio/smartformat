@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+   smartformat.dotnet
+   ~~~~~~~~~~~~~~~~~~
+
+   :copyright: (c) 2016 by What! Studio
+   :license: BSD, see LICENSE for more details.
+
+"""
 import string
 
 from babel import Locale
@@ -101,7 +110,10 @@ class DotNetFormatter(string.Formatter):
         """Format specifiers are described in :func:`format_field` which is a
         static function.
         """
-        spec, arg = format_spec[0], format_spec[1:]
-        spec = spec.lower()
-        arg = int(arg) if arg else None
+        if format_spec:
+            spec, arg = format_spec[0], format_spec[1:]
+            spec = spec.lower()
+            arg = int(arg) if arg else None
+        else:
+            spec = arg = None
         return self._format_field(spec, arg, value, self.numeric_locale)
