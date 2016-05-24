@@ -1,84 +1,56 @@
 # -*- coding: utf-8 -*-
-import babel
-import pytest
-
 from smartformat.dotnet import DotNetFormatter
 from smartformat.smart import SmartFormatter
 
 
-en_us = babel.Locale.parse('en_US')
-ru_ru = babel.Locale.parse('ru_RU')
-fr_fr = babel.Locale.parse('fr_FR')
-ja_jp = babel.Locale.parse('ja_JP')
+class TestFormatter(object):
+
+    formatter_class = NotImplemented
+
+    def format(self, locale, *args, **kwargs):
+        formatter = self.formatter_class(locale)
+        return formatter.format(*args, **kwargs)
 
 
-def assert_format_results(formatter, format_string, expectations):
-    for args, expected in expectations:
-        assert formatter.format(format_string, *args) == expected
+class TestDotNetFormatter(TestFormatter):
+
+    formatter_class = DotNetFormatter
+
+    def test_no_format_spec(self):
+        assert self.format('en_US', u'{0}', 123) == u'123'
+
+    def test_currency(self):
+        assert self.format('en_US', u'{0:c}', 123.456) == u'$123.46'
+        assert self.format('fr_FR', u'{0:c}', 123.456) == u'123,46\xa0€'
+        assert self.format('ja_JP', u'{0:c}', 123.456) == u'￥123'
+        assert self.format('fr_FR', u'{0:c3}', -123.456) == u'-123,456\xa0€'
+        assert self.format('ja_JP', u'{0:c3}', -123.456) == u'-￥123.456'
+
+    def test_number(self):
+        assert self.format('en_US', u'{0:n}', 1234.567) == u'1,234.57'
+        assert self.format('ru_RU', u'{0:n}', 1234.567) == u'1\xa0234,57'
+        assert self.format('en_US', u'{0:n1}', 1234) == u'1,234.0'
+        assert self.format('ru_RU', u'{0:n1}', 1234) == u'1\xa0234,0'
+        assert self.format('en_US', u'{0:n3}', -1234.56) == u'-1,234.560'
+        assert self.format('ru_RU', u'{0:n3}', -1234.56) == u'-1\xa0234,560'
+
+    def test_percent(self):
+        assert self.format('en_US', u'{0:p}', 1) == u'100.00%'
+        assert self.format('fr_FR', u'{0:p}', 1) == u'100,00%'
+        assert self.format('en_US', u'{0:p1}', -0.39678) == u'-39.7%'
+        assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7%'
 
 
-def test_dot_net_format_without_format_spec():
-    F = DotNetFormatter
-    assert F(en_us).format(u'{0}', 123) == u'123'
+class TestSmartFormatter(TestFormatter):
+
+    formatter_class = SmartFormatter
 
 
-def test_dot_net_format_currency():
-    F = DotNetFormatter
-    assert F(en_us).format(u'{0:c}', 123.456) == u'$123.46'
-    assert F(fr_fr).format(u'{0:c}', 123.456) == u'123,46\xa0€'
-    # assert F(ja_jp).format(u'{0:c}', 123.456) == u'¥123'
-    assert F(ja_jp).format(u'{0:c}', 123.456) == u'￥123'
-    # assert F(en_us).format(u'{0:c3}', -123.456) == u'($123.456)'
-    assert F(fr_fr).format(u'{0:c3}', -123.456) == u'-123,456\xa0€'
-    assert F(ja_jp).format(u'{0:c3}', -123.456) == u'-￥123.456'
-
-
-def test_dot_net_format_number():
-    F = DotNetFormatter
-    assert F(en_us).format(u'{0:n}', 1234.567) == u'1,234.57'
-    assert F(ru_ru).format(u'{0:n}', 1234.567) == u'1\xa0234,57'
-    assert F(en_us).format(u'{0:n1}', 1234) == u'1,234.0'
-    assert F(ru_ru).format(u'{0:n1}', 1234) == u'1\xa0234,0'
-    assert F(en_us).format(u'{0:n3}', -1234.56) == u'-1,234.560'
-    assert F(ru_ru).format(u'{0:n3}', -1234.56) == u'-1\xa0234,560'
-
-
-def test_dot_net_format_percent():
-    F = DotNetFormatter
-    assert F(en_us).format(u'{0:p}', 1) == u'100.00%'
-    assert F(fr_fr).format(u'{0:p}', 1) == u'100,00%'
-    assert F(en_us).format(u'{0:p1}', -0.39678) == u'-39.7%'
-    assert F(fr_fr).format(u'{0:p1}', -0.39678) == u'-39,7%'
-
-
-def test_smart_formatter_throws_exceptions():
-    f = SmartFormatter()
-    with pytest.raises(IndexError):
-        f.format(u'--{0}--', error=42)
-
-
-def test_smart_formatter_plural():
-    F = SmartFormatter
-    # assert \
-    #     F(en_us).format(u'You have {0} new {0:message|messages}', 1) == \
-    #     u'You have 1 new message'
-    # assert \
-    #     F(en_us).format(u'You have {0} new {0:message|messages}', 2) == \
-    #     u'You have 2 new messages'
-    assert \
-        F(en_us).format(u'There {0:plural:is 1 item|are {} items}.', 1) == \
-        u'There is 1 item.'
-    assert \
-        F(en_us).format(u'There {0:plural:is 1 item|are {} items}.', 2) == \
-        u'There are 2 items.'
-
-
-class TestPlural(object):
+class TestPlural(TestSmartFormatter):
 
     def assert_plural(self, locale, format_string, expectations):
-        formatter = SmartFormatter(locale)
         for number, expected in expectations.items():
-            assert formatter.format(format_string, number) == expected
+            assert self.format(locale, format_string, number) == expected
 
     def test_english(self):
         self.assert_plural('en_US',  # noqa
@@ -129,7 +101,6 @@ class TestPlural(object):
         )
 
     def test_specific_language(self):
-        smart = SmartFormatter()
         format_string = (u'{0} {0:plural(en):one|many} {0:p(ko):많이} '
                          u'{0:plural(pl):miesiąc|miesiące|miesięcy}')
-        assert smart.format(format_string, 2) == u'2 many 많이 miesiące'
+        assert self.format(None, format_string, 2) == u'2 many 많이 miesiące'
