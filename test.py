@@ -12,9 +12,9 @@ fr_fr = babel.Locale.parse('fr_FR')
 ja_jp = babel.Locale.parse('ja_JP')
 
 
-def assert_format_results(formatter, template, expectations):
+def assert_format_results(formatter, format_string, expectations):
     for args, expected in expectations:
-        assert formatter.format(template, *args) == expected
+        assert formatter.format(format_string, *args) == expected
 
 
 def test_dot_net_format_without_format_spec():
@@ -75,10 +75,10 @@ def test_smart_formatter_plural():
 
 class TestPlural(object):
 
-    def assert_plural(self, locale, template, expectations):
+    def assert_plural(self, locale, format_string, expectations):
         formatter = SmartFormatter(locale)
         for number, expected in expectations.items():
-            assert formatter.format(template, number) == expected
+            assert formatter.format(format_string, number) == expected
 
     def test_english(self):
         self.assert_plural('en_US',  # noqa
@@ -127,3 +127,9 @@ class TestPlural(object):
                 125: u'Я купил 125 бананов.',
             }
         )
+
+    def test_specific_language(self):
+        smart = SmartFormatter()
+        format_string = (u'{0} {0:plural(en):one|many} {0:p(ko):많이} '
+                         u'{0:plural(pl):miesiąc|miesiące|miesięcy}')
+        assert smart.format(format_string, 2) == u'2 many 많이 miesiące'

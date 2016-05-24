@@ -9,6 +9,8 @@
 """
 import decimal
 
+from babel import Locale
+
 from .smart import ext
 from .utils import get_plural_tag_index
 
@@ -21,15 +23,17 @@ def plural(formatter, value, name, opts, format):
     # Extract the plural words from the format string.
     words = format.split('|')
     # This extension requires at least two plural words.
-    if len(words) == 1:
+    if not name and len(words) == 1:
         return
     # This extension only formats numbers.
     try:
         number = decimal.Decimal(value)
     except decimal.InvalidOperation:
         return
+    # Get the locale.
+    locale = Locale.parse(opts) if opts else formatter.locale
     # Select word based on the plural tag index.
-    index = get_plural_tag_index(number, formatter.locale)
+    index = get_plural_tag_index(number, locale)
     return formatter.format(words[index], value)
 
 

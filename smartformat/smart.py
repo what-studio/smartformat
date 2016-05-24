@@ -15,7 +15,7 @@ from .dotnet import DotNetFormatter
 
 FORMAT_SPEC_PATTERN = re.compile(r'''
     (?:
-        (?P<name>.+)
+        (?P<name>[^(]+)
         (?:
             \((?P<opts>.*)\)
         )?
@@ -104,6 +104,9 @@ class Extension(object):
 
 def ext(names, pass_formatter=False):
     """Makes a function to be an extension."""
+    for name in names:
+        if '(' in name:
+            raise ValueError("Extension name can't include '('")
     def decorator(f, names=names, pass_formatter=pass_formatter):
         return Extension(f, names=names, pass_formatter=pass_formatter)
     return decorator
