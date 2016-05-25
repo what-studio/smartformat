@@ -15,7 +15,7 @@ from .dotnet import DotNetFormatter
 
 FORMAT_SPEC_PATTERN = re.compile(r'''
     (?:
-        (?P<name>[:alnum:]+)
+        (?P<name>[a-zA-Z_]+)
         (?:
             \((?P<option>.*)\)
         )?
