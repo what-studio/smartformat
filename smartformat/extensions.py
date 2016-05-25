@@ -3,6 +3,8 @@
    smartformat.extensions
    ~~~~~~~~~~~~~~~~~~~~~~
 
+   Default extensions from the original SmartFormat.
+
    :copyright: (c) 2016 by What! Studio
    :license: BSD, see LICENSE for more details.
 
@@ -19,7 +21,7 @@ __all__ = ['plural']
 
 
 @ext(['plural', 'p', ''], pass_formatter=True)
-def plural(formatter, value, name, opts, format):
+def plural(formatter, value, name, option, format):
     """Chooses different text for locale-specific pluralization rules.
 
     Spec: `{:[p[lural]][(locale)]:msgstr0|msgstr1|...}`
@@ -43,7 +45,7 @@ def plural(formatter, value, name, opts, format):
     except decimal.InvalidOperation:
         return
     # Get the locale.
-    locale = Locale.parse(opts) if opts else formatter.locale
+    locale = Locale.parse(option) if option else formatter.locale
     # Select word based on the plural tag index.
     index = get_plural_tag_index(number, locale)
     return formatter.format(words[index], value)
@@ -60,7 +62,7 @@ def get_choice(value):
 
 
 @ext(['choose', 'c'], pass_formatter=True)
-def choose(formatter, value, name, opts, format):
+def choose(formatter, value, name, option, format):
     """Adds simple logic to format strings.
 
     Spec: `{:c[hoose](choice1|choice2|...):word1|word2|...[|default]}`
@@ -73,13 +75,13 @@ def choose(formatter, value, name, opts, format):
        u'other'
 
     """
-    if not opts:
+    if not option:
         return
     words = format.split('|')
     num_words = len(words)
     if num_words < 2:
         return
-    choices = opts.split('|')
+    choices = option.split('|')
     num_choices = len(choices)
     # If the words has 1 more item than the choices, the last word will be
     # used as a default choice.

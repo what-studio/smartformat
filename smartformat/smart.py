@@ -17,7 +17,7 @@ FORMAT_SPEC_PATTERN = re.compile(r'''
     (?:
         (?P<name>[^(]+)
         (?:
-            \((?P<opts>.*)\)
+            \((?P<option>.*)\)
         )?
         :
     )?
@@ -27,7 +27,7 @@ FORMAT_SPEC_PATTERN = re.compile(r'''
 
 def parse_format_spec(format_spec):
     m = FORMAT_SPEC_PATTERN.match(format_spec)
-    return m.group('name') or '', m.group('opts'), m.group('format')
+    return m.group('name') or '', m.group('option'), m.group('format')
 
 
 class SmartFormatter(DotNetFormatter):
@@ -50,15 +50,15 @@ class SmartFormatter(DotNetFormatter):
                     self._extensions[name] = deque([ext])
 
     def format_field(self, value, format_spec):
-        name, opts, format = parse_format_spec(format_spec)
-        rv = self.eval_formatter(value, name, opts, format)
+        name, option, format = parse_format_spec(format_spec)
+        rv = self.eval_formatter(value, name, option, format)
         if rv is not None:
             return rv
         return super(SmartFormatter, self).format_field(value, format_spec)
 
-    def eval_formatter(self, value, name, opts, format):
+    def eval_formatter(self, value, name, option, format):
         for ext in self._extensions.get(name, ()):
-            rv = ext.eval(self, value, name, opts, format)
+            rv = ext.eval(self, value, name, option, format)
             if rv is not None:
                 return rv
 
@@ -79,7 +79,7 @@ class Extension(object):
     """A formatter extension which wraps a function.  It works like a wrapped
     function but has several specific attributes and methods.
 
-    A funciton to be an extension takes `(name, opts, format)`.  If you set
+    A funciton to be an extension takes `(name, option, format)`.  If you set
     `pass_formatter=True` a smart formatter object will be passed as the first
     argument.  The funcion should return a string as the result or ``None``
     to pass to format a string.
@@ -93,9 +93,9 @@ class Extension(object):
         self.names = names
         self.pass_formatter = pass_formatter
 
-    def eval(self, formatter, value, name, opts, format):
+    def eval(self, formatter, value, name, option, format):
         args = [formatter] if self.pass_formatter else []
-        args.extend([value, name, opts, format])
+        args.extend([value, name, option, format])
         return self.function(*args)
 
     def __call__(self, *args, **kwargs):
