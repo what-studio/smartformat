@@ -37,6 +37,16 @@ def plural(formatter, value, name, opts, format):
     return formatter.format(words[index], value)
 
 
+def get_choice(value):
+    """Gets a key to choose a choice from any value."""
+    if value is None:
+        return 'null'
+    for attr in ['__name__', 'name']:
+        if hasattr(value, attr):
+            return getattr(value, attr)
+    return str(value)
+
+
 @ext(['choose', 'c'], pass_formatter=True)
 def choose(formatter, value, name, opts, format):
     if not opts:
@@ -45,8 +55,11 @@ def choose(formatter, value, name, opts, format):
     if len(words) < 2:
         return
     choices = opts.split('|')
-    key = 'null' if value is None else str(value)
-    index = choices.index(key)
+    choice = get_choice(value)
+    try:
+        index = choices.index(choice)
+    except ValueError:
+        index = -1
     return formatter.format(words[index], value)
 
 
