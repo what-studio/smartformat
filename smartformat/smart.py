@@ -13,6 +13,9 @@ import re
 from .dotnet import DotNetFormatter
 
 
+__all__ = ['ext', 'SmartFormatter']
+
+
 FORMAT_SPEC_PATTERN = re.compile(r'''
     (?:
         (?P<name>[a-zA-Z_]+)

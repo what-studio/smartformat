@@ -19,7 +19,7 @@ from .smart import ext
 from .utils import get_plural_tag_index
 
 
-__all__ = ['plural']
+__all__ = ['choose', 'conditional', 'list_', 'plural']
 
 
 @ext(['plural', 'p', ''], pass_formatter=True)
