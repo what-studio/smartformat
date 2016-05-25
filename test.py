@@ -288,8 +288,8 @@ class TestList(TestSmartFormatter):
         self.assert_format(u'{4:{}|}', args, u'12345')
         self.assert_format(u'{4:{}|,}', args, u'1,2,3,4,5')
         self.assert_format(u'{4:{}|, |, and }', args, u'1, 2, 3, 4, and 5')
-        # self.assert_format(u'{4:{:n2}|, |, and }', args,
-        #                    u'1.00, 2.00, 3.00, 4.00, and 5.00')
+        self.assert_format(u'{4:{:n2}|, |, and }', args,
+                           u'1.00, 2.00, 3.00, 4.00, and 5.00')
         self.assert_format(u'{0:{}-|}', args, u'A-B-C-D-E-')
         self.assert_format(u'{0:{}|-}', args, u'A-B-C-D-E')
         self.assert_format(u'{0:{}|-|+}', args, u'A-B-C-D+E')
@@ -322,7 +322,8 @@ class TestList(TestSmartFormatter):
         #                    u'1, v = 2, e = 3')
         # Index is used to synchronize 2 lists.
         # self.assert_format(u'{0:{} = {1.index}|, }', args,
-        #                    u'A = One, B = Two, C = Three, D = Four, E = Five')
+        #                    u'A = One, B = Two, C = Three, '
+        #                    u'D = Four, E = Five')
         # In contrast to SmartFormat.NET, `index` cannot be used out of a list
         # context.
         with pytest.raises(KeyError):

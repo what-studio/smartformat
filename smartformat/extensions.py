@@ -130,6 +130,7 @@ def list_(formatter, value, name, option, format):
     words = format.split(u'|', 4)
     num_words = len(words)
     if num_words < 2:
+        # Require at least two words for item format and spacer.
         return
     num_items = len(value)
     item_format = words[0]
