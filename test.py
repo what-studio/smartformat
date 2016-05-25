@@ -9,6 +9,7 @@ from smartformat.smart import SmartFormatter
 
 
 class Gender(Enum):
+    """Example enum."""
 
     male = 0
     female = 1
@@ -21,7 +22,7 @@ class TestFormatter(object):
     def format(self, locale, *args, **kwargs):
         try:
             locale = Locale.parse(locale)
-        except UnknownLocaleError:
+        except (ValueError, UnknownLocaleError):
             args = (locale,) + args
             locale = None
         formatter = self.formatter_class(locale)

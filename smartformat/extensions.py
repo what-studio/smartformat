@@ -20,6 +20,18 @@ __all__ = ['plural']
 
 @ext(['plural', 'p', ''], pass_formatter=True)
 def plural(formatter, value, name, opts, format):
+    """Chooses different text for locale-specific pluralization rules.
+
+    Spec: `{:[p[lural]][(locale)]:msgstr0|msgstr1|...}`
+
+    Example::
+
+       >>> smart.format(u'There {num:is an item|are {} items}.', num=1}
+       There is an item.
+       >>> smart.format(u'There {num:is an item|are {} items}.', num=10}
+       There are 10 items.
+
+    """
     # Extract the plural words from the format string.
     words = format.split('|')
     # This extension requires at least two plural words.
@@ -49,16 +61,37 @@ def get_choice(value):
 
 @ext(['choose', 'c'], pass_formatter=True)
 def choose(formatter, value, name, opts, format):
+    """Adds simple logic to format strings.
+
+    Spec: `{:c[hoose](choice1|choice2|...):word1|word2|...[|default]}`
+
+    Example::
+
+       >>> smart.format(u'{num:choose(1|2|3):one|two|three|other}, num=1)
+       u'one'
+       >>> smart.format(u'{num:choose(1|2|3):one|two|three|other}, num=4)
+       u'other'
+
+    """
     if not opts:
         return
     words = format.split('|')
-    if len(words) < 2:
+    num_words = len(words)
+    if num_words < 2:
         return
     choices = opts.split('|')
+    num_choices = len(choices)
+    # If the words has 1 more item than the choices, the last word will be
+    # used as a default choice.
+    if num_words not in (num_choices, num_choices + 1):
+        n = num_choices
+        raise ValueError('Specify %d or %d choices' % (n, n + 1))
     choice = get_choice(value)
     try:
         index = choices.index(choice)
     except ValueError:
+        if num_words == num_choices:
+            raise ValueError('No default choice supplied')
         index = -1
     return formatter.format(words[index], value)
 
