@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import date
 from enum import Enum
 
 from babel import Locale, UnknownLocaleError
@@ -13,6 +14,58 @@ class Gender(Enum):
 
     male = 0
     female = 1
+
+
+class Person(object):
+
+    def __init__(self, name, gender, birthday, address):
+        self.name = name
+        self.gender = gender
+        self.birthday = birthday
+        self.address = address
+        self.friends = []
+        self.spouse = None
+
+    def marry(self, spouse):
+        self.spouse, spouse.spouse = spouse, self
+
+    def parse_name(self):
+        parts = self.name.split(' ', 2)
+        assert len(parts) >= 2
+        if len(parts) == 2:
+            return (parts[0], None, parts[1])
+        else:
+            return (parts[0], parts[1], parts[2])
+
+    @property
+    def first_name(self):
+        return self.parse_name()[0]
+
+    @property
+    def middle_name(self):
+        return self.parse_name()[1]
+
+    @property
+    def last_name(self):
+        return self.parse_name()[2]
+
+
+@pytest.fixture
+def michael():
+    michael = Person(u'Michael Scott', Gender.male, date(1970, 3, 3),
+                     u'333 Third St, Scranton, PA 18447')
+    jim = Person(u'Jim Halpert', Gender.male, date(1979, 1, 1),
+                 u'111 First St, Scranton, PA 18447')
+    pam = Person(u'Pam Halpert', Gender.female, date(1980, 1, 1),
+                 u'111 First St, Scranton, PA 18447')
+    dwight = Person(u'Dwight K Schrute', Gender.male, date(1978, 2, 2),
+                    u'222 Second St, Scranton, PA 18447')
+    michael.friends.extend([jim, pam, dwight])
+    jim.friends.extend([dwight, michael])
+    pam.friends.extend([dwight, michael])
+    jim.marry(pam)
+    dwight.friends.append(michael)
+    return michael
 
 
 class TestFormatter(object):
@@ -215,3 +268,59 @@ class TestConditional(TestSmartFormatter):
             self.format(u'{0:conditional:}', 1)
         with pytest.raises(NotImplementedError):
             self.format(u'{0:cond:}', 1)
+
+
+class TestList(TestSmartFormatter):
+
+    @pytest.fixture
+    def args(self, michael):
+        return (
+            list('ABCDE'), 'One Two Three Four Five'.split(), michael.friends,
+            [date(2000, 1, 1), date(2010, 10, 10), date(5555, 5, 5)],
+            list(range(1, 6)),
+        )
+
+    def test_basic(self, args):
+        # self.assert_format(u'{4}', args, u'System.Int32[]')
+        self.assert_format(u'{4:|}', args, u'12345')
+        self.assert_format(u'{4:00|}', args, u'0102030405')
+        self.assert_format(u'{4:|,}', args, u'1,2,3,4,5')
+        self.assert_format(u'{4:|, |, and }', args, u'1, 2, 3, 4, and 5')
+        self.assert_format(u'{4:N2|, |, and }', args,
+                           u'1.00, 2.00, 3.00, 4.00, and 5.00')
+
+    def test_nested(self, args):
+        self.assert_format(u'{0:{}-|}', args, u'A-B-C-D-E-')
+        self.assert_format(u'{0:{}|-}', args, u'A-B-C-D-E')
+        self.assert_format(u'{0:{}|-|+}', args, u'A-B-C-D+E')
+        self.assert_format(u'{0:({})|, |, and }', args,
+                           u'(A), (B), (C), (D), and (E)')
+
+    def test_nested_array(self, args):
+        self.assert_format(u'{2:{:{first_name}}|, }', args,
+                           u'Jim, Pam, Dwight')
+        self.assert_format(u'{3:{:M/d/yyyy} |}', args,
+                           u'1/1/2000 10/10/2010 5/5/5555 ')
+        self.assert_format(
+            u"{2:{:{first_name}'s friends: {friends:{first_name}|, } }|; }",
+            args,
+            u"Jim's friends: Dwight, Michael ; "
+            u"Pam's friends: Dwight, Michael ; "
+            u"Dwight's friends: Michael ",
+        )
+
+    def test_index(self, args):
+        # Index holds the current index of the iteration.
+        self.assert_format(u'{0:{} = {Index}|, }', args,
+                           u'A = 0, B = 1, C = 2, D = 3, E = 4')
+        # Index can be nested.
+        self.assert_format(u'{1:{Index}: {ToCharArray:{} = {Index}|, }|; }',
+                           args, u'0: O = 0, n = 1, e = 2; 1: T = 0, w = 1, '
+                           u'o = 2; 2: T = 0, h = 1, r = 2, e = 3, e = 4; 3: '
+                           u'F = 0, o = 1, u = 2, r = 3; 4: F = 0, i = 1, '
+                           u'v = 2, e = 3')
+        # Index is used to synchronize 2 lists.
+        self.assert_format(u'{0:{} = {1.Index}|, }', args,
+                           u'A = One, B = Two, C = Three, D = Four, E = Five')
+        # Index can be used out-of-context, but should always be -1.
+        self.assert_format(u'{Index}', args, u'-1')

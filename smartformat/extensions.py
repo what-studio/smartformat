@@ -42,7 +42,7 @@ def plural(formatter, value, name, option, format):
     # This extension only formats numbers.
     try:
         number = decimal.Decimal(value)
-    except decimal.InvalidOperation:
+    except (ValueError, decimal.InvalidOperation):
         return
     # Get the locale.
     locale = Locale.parse(option) if option else formatter.locale
@@ -104,6 +104,21 @@ def conditional(value, name, option, format):
     SmartFormatter has deprecated the 'conditional' extension.
     """
     raise NotImplementedError('Obsolete extension: conditional')
+
+
+@ext(['list', 'l', ''])
+def list_(value, name, option, format):
+    """Repeats the items of an array.
+
+    Spec: `{:[l[ist]:]item|spacer|final_spacer}`
+
+    Example::
+
+       >>> fruits = [u'apple', u'banana', u'coconut']
+       >>> smart.format(u'{fruits:list:{}|, |, and}', fruits=fruits)
+       u'apple, banana, and coconut'
+
+    """
 
 
 #: The list of default extensions.
