@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
+from enum import Enum
+
+from babel import Locale, UnknownLocaleError
+import pytest
+
 from smartformat.dotnet import DotNetFormatter
 from smartformat.smart import SmartFormatter
+
+
+class Gender(Enum):
+
+    male = 0
+    female = 1
 
 
 class TestFormatter(object):
@@ -8,6 +19,11 @@ class TestFormatter(object):
     formatter_class = NotImplemented
 
     def format(self, locale, *args, **kwargs):
+        try:
+            locale = Locale.parse(locale)
+        except UnknownLocaleError:
+            args = (locale,) + args
+            locale = None
         formatter = self.formatter_class(locale)
         return formatter.format(*args, **kwargs)
 
@@ -45,14 +61,22 @@ class TestSmartFormatter(TestFormatter):
 
     formatter_class = SmartFormatter
 
+    def assert_format(self, locale, format_string, args, expected=None):
+        """Asserts that a formatted string is same with expected string."""
+        if expected is None:
+            format_string, args, expected = locale, format_string, args
+            locale = None
+        if not isinstance(args, tuple):
+            args = (args,)
+        assert self.format(locale, format_string, *args) == expected
+
     def assert_formats(self, locale, format_string, expectations=None):
+        """Asserts formatted strings by multiple arguments."""
         if expectations is None:
             format_string, expectations = locale, format_string
             locale = None
         for args, expected in expectations.items():
-            if not isinstance(args, tuple):
-                args = (args,)
-            assert self.format(locale, format_string, *args) == expected
+            self.assert_format(locale, format_string, args, expected)
 
 
 class TestPlural(TestSmartFormatter):
@@ -114,18 +138,70 @@ class TestPlural(TestSmartFormatter):
 class TestChoose(TestSmartFormatter):
 
     def test_int_str_bool(self):
-        self.assert_formats(u'{0:choose(1|2|3):one|two|three}', {
+        xx = self.assert_formats
+        xx(u'{0:choose(1|2|3):one|two|three}', {
             1: u'one', 2: u'two', 3: u'three',
         })
-        self.assert_formats(u'{0:choose(3|2|1):three|two|one}', {
+        xx(u'{0:choose(3|2|1):three|two|one}', {
             1: u'one', 2: u'two', 3: u'three',
         })
-        self.assert_formats(u'{0:choose(1|2|3):one|two|three}', {
+        xx(u'{0:choose(1|2|3):one|two|three}', {
             u'1': u'one', u'2': u'two', u'3': u'three',
         })
-        self.assert_formats(u'{0:choose(A|B|C):Alpha|Bravo|Charlie}', {
+        xx(u'{0:choose(A|B|C):Alpha|Bravo|Charlie}', {
             u'A': u'Alpha', u'B': u'Bravo', u'C': u'Charlie',
         })
-        self.assert_formats(u'{0:choose(True|False):yep|nope}', {
+        xx(u'{0:choose(True|False):yep|nope}', {
             True: u'yep', False: u'nope',
         })
+
+    def test_case_sensitive(self):
+        x = self.assert_format
+        x(u'{0:choose(true|True):one|two|default}', True, u'two')
+        x(u'{0:choose(true|TRUE):one|two|default}', True, u'default')
+        x(u'{0:choose(string|String):one|two|default}', 'String', u'two')
+        x(u'{0:choose(string|STRING):one|two|default}', 'String', u'default')
+
+    def test_default_to_last(self):
+        x = self.assert_format
+        x(u'{0:choose(1|2|3):one|two|three|default}', 1, u'one')
+        x(u'{0:choose(1|2|3):one|two|three|default}', 2, u'two')
+        x(u'{0:choose(1|2|3):one|two|three|default}', 3, u'three')
+        x(u'{0:choose(1|2|3):one|two|three|default}', 4, u'default')
+        x(u'{0:choose(1|2|3):one|two|three|default}', 99, u'default')
+        x(u'{0:choose(1|2|3):one|two|three|default}', None, u'default')
+        x(u'{0:choose(1|2|3):one|two|three|default}', True, u'default')
+        x(u'{0:choose(1|2|3):one|two|three|default}', 'whatever', u'default')
+
+    def test_enum(self):
+        x = self.assert_format
+        x(u'{0:choose(male|female):man|woman}', Gender.male, u'man')
+        x(u'{0:choose(male|female):man|woman}', Gender.female, u'woman')
+        x(u'{0:choose(male):man|woman}', Gender.male, u'man')
+        x(u'{0:choose(male):man|woman}', Gender.female, u'woman')
+
+    def test_null(self):
+        x = self.assert_format
+        x(u'{0:choose(null):nothing|{} }', None, u'nothing')
+        x(u'{0:choose(null):nothing|{} }', 5, u'5 ')
+        x(u'{0:choose(null|5):nothing|five|{} }', None, u'nothing')
+        x(u'{0:choose(null|5):nothing|five|{} }', 5, u'five')
+        x(u'{0:choose(null|5):nothing|five|{} }', 6, u'6 ')
+
+    def test_invalid(self):
+        with pytest.raises(ValueError):
+            self.format(u'{0:choose(1|2):1|2}', 99)
+        with pytest.raises(ValueError):
+            self.format(u'{0:choose(1):1}', 99)
+
+    def test_too_few_choices(self):
+        with pytest.raises(ValueError):
+            self.format(u'{0:choose(1|2):1}', 1)
+        with pytest.raises(ValueError):
+            self.format(u'{0:choose(1|2|3):1|2}', 1)
+
+    def test_too_many_choices(self):
+        with pytest.raises(ValueError):
+            self.format(u'{0:choose(1):1|2|3}', 1)
+        with pytest.raises(ValueError):
+            self.format(u'{0:choose(1|2):1|2|3|4}', 1)
