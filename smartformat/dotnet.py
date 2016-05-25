@@ -12,6 +12,7 @@ import string
 from babel import Locale
 from babel.numbers import (
     format_currency, get_territory_currencies, LC_NUMERIC, NumberPattern)
+from six import string_types, text_type as str
 from valuedispatch import valuedispatch
 
 
@@ -98,9 +99,15 @@ class DotNetFormatter(string.Formatter):
     def numeric_locale(self):
         return self.locale or LC_NUMERIC
 
+    def vformat(self, format_string, args, kwargs):
+        if not format_string:
+            return u''
+        base = super(DotNetFormatter, self)
+        return base.vformat(format_string, args, kwargs)
+
     def get_value(self, key, args, kwargs):
-        if isinstance(key, str):
-            key, comma, width = key.partition(',')
+        if isinstance(key, string_types):
+            key, comma, width = key.partition(u',')
             if comma:
                 raise NotImplementedError('Width specifier after comma '
                                           'is not implemented yet')

@@ -22,12 +22,12 @@ FORMAT_SPEC_PATTERN = re.compile(r'''
         :
     )?
     (?P<format>.*)
-''', re.VERBOSE)
+''', re.VERBOSE | re.UNICODE)
 
 
 def parse_format_spec(format_spec):
     m = FORMAT_SPEC_PATTERN.match(format_spec)
-    return m.group('name') or '', m.group('option'), m.group('format')
+    return m.group('name') or u'', m.group('option'), m.group('format')
 
 
 class SmartFormatter(DotNetFormatter):

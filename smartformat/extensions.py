@@ -3,15 +3,17 @@
    smartformat.extensions
    ~~~~~~~~~~~~~~~~~~~~~~
 
-   Default extensions from the original SmartFormat.
+   Default extensions from SmartFormat.NET, the original implementation.
 
    :copyright: (c) 2016 by What! Studio
    :license: BSD, see LICENSE for more details.
 
 """
 import decimal
+import io
 
 from babel import Locale
+from six import string_types
 
 from .smart import ext
 from .utils import get_plural_tag_index
@@ -100,26 +102,58 @@ def choose(formatter, value, name, option, format):
 
 @ext(['conditional', 'cond'])
 def conditional(value, name, option, format):
-    """SmartFormat for Python doesn't implement it because the original
-    SmartFormatter has deprecated the 'conditional' extension.
+    """SmartFormat for Python doesn't implement it because SmartFormat.NET has
+    deprecated the 'conditional' extension.
     """
     raise NotImplementedError('Obsolete extension: conditional')
 
 
-@ext(['list', 'l', ''])
-def list_(value, name, option, format):
+@ext(['list', 'l', ''], pass_formatter=True)
+def list_(formatter, value, name, option, format):
     """Repeats the items of an array.
 
-    Spec: `{:[l[ist]:]item|spacer|final_spacer}`
+    Spec: `{:[l[ist]:]item|spacer[|final_spacer[|two_spacer]]}`
 
     Example::
 
        >>> fruits = [u'apple', u'banana', u'coconut']
-       >>> smart.format(u'{fruits:list:{}|, |, and}', fruits=fruits)
+       >>> smart.format(u'{fruits:list:{}|, |, and | and }', fruits=fruits)
        u'apple, banana, and coconut'
+       >>> smart.format(u'{fruits:list:{}|, |, and | and }', fruits=fruits[:2])
+       u'apple and banana'
 
     """
+    if not format:
+        return
+    if not hasattr(value, '__getitem__') or isinstance(value, string_types):
+        return
+    words = format.split(u'|', 4)
+    num_words = len(words)
+    if num_words < 2:
+        return
+    num_items = len(value)
+    item_format = words[0]
+    # NOTE: SmartFormat.NET treats a not nested item format as the format
+    # string to format each items.  For example, `x` will be treated as `{:x}`.
+    # But the original tells us this behavior has been deprecated so that
+    # should be removed.  So SmartFormat for Python doesn't implement the
+    # behavior.
+    spacer = u'' if num_words < 2 else words[1]
+    final_spacer = spacer if num_words < 3 else words[2]
+    two_spacer = final_spacer if num_words < 4 else words[3]
+    buf = io.StringIO()
+    for x, item in enumerate(value):
+        if x == 0:
+            pass
+        elif x < num_items - 1:
+            buf.write(spacer)
+        elif x == 1:
+            buf.write(two_spacer)
+        else:
+            buf.write(final_spacer)
+        buf.write(formatter.format(item_format, item, index=x))
+    return buf.getvalue()
 
 
 #: The list of default extensions.
-DEFAULT_EXTENSIONS = [plural, choose, conditional]
+DEFAULT_EXTENSIONS = [plural, choose, conditional, list_]
