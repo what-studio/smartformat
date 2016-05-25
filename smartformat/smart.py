@@ -51,12 +51,15 @@ class SmartFormatter(DotNetFormatter):
 
     def format_field(self, value, format_spec):
         name, option, format = parse_format_spec(format_spec)
-        rv = self.eval_formatter(value, name, option, format)
+        rv = self.eval_extensions(value, name, option, format)
         if rv is not None:
             return rv
         return super(SmartFormatter, self).format_field(value, format_spec)
 
-    def eval_formatter(self, value, name, option, format):
+    def eval_extensions(self, value, name, option, format):
+        """Evaluates extensions in the registry.  If some extension handles the
+        format string, it returns a string.  Otherwise, returns ``None``.
+        """
         for ext in self._extensions.get(name, ()):
             rv = ext.eval(self, value, name, option, format)
             if rv is not None:
@@ -64,12 +67,14 @@ class SmartFormatter(DotNetFormatter):
 
     def get_value(self, field_name, args, kwargs):
         if not field_name:
+            # `{}` is same with `{0}`.
             field_name = 0
         return super(SmartFormatter, self).get_value(field_name, args, kwargs)
 
     def _vformat(self, format_string, args, kwargs,
                  used_args, recursion_depth):
         if recursion_depth != 2:
+            # Don't format recursive format string such as `{:12{this}34}`.
             return format_string
         base = super(SmartFormatter, self)
         return base._vformat(format_string, args, kwargs, used_args, 2)

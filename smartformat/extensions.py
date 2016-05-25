@@ -98,5 +98,13 @@ def choose(formatter, value, name, option, format):
     return formatter.format(words[index], value)
 
 
+@ext(['conditional', 'cond'])
+def conditional(value, name, option, format):
+    """SmartFormat for Python doesn't implement it because the original
+    SmartFormatter has deprecated the 'conditional' extension.
+    """
+    raise NotImplementedError('Obsolete extension: conditional')
+
+
 #: The list of default extensions.
-DEFAULT_EXTENSIONS = [plural, choose]
+DEFAULT_EXTENSIONS = [plural, choose, conditional]

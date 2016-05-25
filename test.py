@@ -206,3 +206,12 @@ class TestChoose(TestSmartFormatter):
             self.format(u'{0:choose(1):1|2|3}', 1)
         with pytest.raises(ValueError):
             self.format(u'{0:choose(1|2):1|2|3|4}', 1)
+
+
+class TestConditional(TestSmartFormatter):
+
+    def test_deprecation(self):
+        with pytest.raises(NotImplementedError):
+            self.format(u'{0:conditional:}', 1)
+        with pytest.raises(NotImplementedError):
+            self.format(u'{0:cond:}', 1)
