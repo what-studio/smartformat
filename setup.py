@@ -38,5 +38,5 @@ setup(
         'Topic :: Software Development :: Localization',
         'Topic :: Text Processing :: Linguistic',
     ],
-    install_requires=['babel', 'six'],
+    install_requires=['babel', 'six', 'valuedispatch'],
 )
