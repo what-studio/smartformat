@@ -35,13 +35,13 @@ def parse_format_spec(format_spec):
 
 class SmartFormatter(DotNetFormatter):
 
-    def __init__(self, locale=None, register_default=True):
+    def __init__(self, locale=None, register_builtin=True):
         super(SmartFormatter, self).__init__(locale)
         # Currently implemented only formatter extensions.
         self._extensions = {}
-        if register_default:
-            from .extensions import DEFAULT_EXTENSIONS
-            self.register(DEFAULT_EXTENSIONS)
+        if register_builtin:
+            from .builtin import BUILTIN_EXTENSIONS
+            self.register(BUILTIN_EXTENSIONS)
 
     def register(self, extensions):
         """Registers extensions."""

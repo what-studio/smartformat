@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-   smartformat.extensions
-   ~~~~~~~~~~~~~~~~~~~~~~
+   smartformat.builtin
+   ~~~~~~~~~~~~~~~~~~~
 
-   Default extensions from SmartFormat.NET, the original implementation.
+   Built-in extensions from SmartFormat.NET, the original implementation.
 
    :copyright: (c) 2016 by What! Studio
    :license: BSD, see LICENSE for more details.
@@ -19,7 +19,7 @@ from .smart import ext
 from .utils import get_plural_tag_index
 
 
-__all__ = ['choose', 'conditional', 'list_', 'plural']
+__all__ = ['BUILTIN_EXTENSIONS', 'choose', 'conditional', 'list_', 'plural']
 
 
 @ext(['plural', 'p', ''], pass_formatter=True)
@@ -156,5 +156,5 @@ def list_(formatter, value, name, option, format):
     return buf.getvalue()
 
 
-#: The list of default extensions.
-DEFAULT_EXTENSIONS = [plural, choose, conditional, list_]
+#: The list of the built-in extensions.
+BUILTIN_EXTENSIONS = [plural, choose, conditional, list_]
