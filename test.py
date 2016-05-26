@@ -114,6 +114,9 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format('en_US', u'{0:p1}', -0.39678) == u'-39.7%'
         assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7%'
 
+    def test_unknown_spec(self):
+        assert self.format(u'~!{0:\x00}!~', 'Smart') == u'~!Smart!~'
+
 
 class TestSmartFormatter(TestFormatter):
 
