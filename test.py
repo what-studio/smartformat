@@ -140,6 +140,14 @@ class TestSmartFormatter(TestFormatter):
             self.assert_format(locale, format_string, args, expected)
 
 
+class TestParsing(TestSmartFormatter):
+
+    @pytest.mark.xfail
+    def test_nested(self):
+        self.assert_format(u'{:A{}|B{}}', 123, u'B123')
+        self.assert_format(u'{:A{{{}}}|B{{{}}}}', 123, u'B{123}')
+
+
 class TestPlural(TestSmartFormatter):
 
     def test_english(self):
