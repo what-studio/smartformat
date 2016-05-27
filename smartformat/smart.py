@@ -13,9 +13,14 @@ import re
 from .dotnet import DotNetFormatter
 
 
-__all__ = ['ext', 'SmartFormatter']
+__all__ = ['default_extensions', 'extension', 'SmartFormatter']
 
 
+#: The extensions to be registered by default.
+default_extensions = deque()
+
+
+NAME_PATTERN = re.compile(r'[a-zA-Z_]*')
 FORMAT_SPEC_PATTERN = re.compile(r'''
     (?:
         (?P<name>[a-zA-Z_]+)
@@ -35,17 +40,16 @@ def parse_format_spec(format_spec):
 
 class SmartFormatter(DotNetFormatter):
 
-    def __init__(self, locale=None, register_builtin=True):
+    def __init__(self, locale=None, register_default=True):
         super(SmartFormatter, self).__init__(locale)
         # Currently implemented only formatter extensions.
         self._extensions = {}
-        if register_builtin:
-            from .builtin import BUILTIN_EXTENSIONS
-            self.register(BUILTIN_EXTENSIONS)
+        if register_default:
+            self.register(default_extensions)
 
     def register(self, extensions):
         """Registers extensions."""
-        for ext in extensions[::-1]:
+        for ext in reversed(extensions):
             for name in ext.names:
                 try:
                     self._extensions[name].appendleft(ext)
@@ -64,7 +68,7 @@ class SmartFormatter(DotNetFormatter):
         format string, it returns a string.  Otherwise, returns ``None``.
         """
         for ext in self._extensions.get(name, ()):
-            rv = ext.eval(self, value, name, option, format)
+            rv = ext(self, value, name, option, format)
             if rv is not None:
                 return rv
 
@@ -87,34 +91,32 @@ class Extension(object):
     """A formatter extension which wraps a function.  It works like a wrapped
     function but has several specific attributes and methods.
 
-    A funciton to be an extension takes `(name, option, format)`.  If you set
-    `pass_formatter=True` a smart formatter object will be passed as the first
-    argument.  The funcion should return a string as the result or ``None``
-    to pass to format a string.
+    A funciton to be an extension takes `(name, option, format)`.  The funcion
+    should return a string as the result or ``None`` to pass to format a
+    string.
 
-    To make an extension, use `@ext` decorator.
+    To make an extension, use `@extension` decorator.
 
     """
 
-    def __init__(self, function, names, pass_formatter=False):
+    def __init__(self, function, names):
         self.function = function
         self.names = names
-        self.pass_formatter = pass_formatter
-
-    def eval(self, formatter, value, name, option, format):
-        args = [formatter] if self.pass_formatter else []
-        args.extend([value, name, option, format])
-        return self.function(*args)
 
     def __call__(self, *args, **kwargs):
         return self.function(*args, **kwargs)
 
 
-def ext(names, pass_formatter=False):
+def extension(names):
     """Makes a function to be an extension."""
     for name in names:
-        if '(' in name:
-            raise ValueError("Extension name can't include '('")
-    def decorator(f, names=names, pass_formatter=pass_formatter):
-        return Extension(f, names=names, pass_formatter=pass_formatter)
+        if not NAME_PATTERN.match(name):
+            raise ValueError('Invalid extension name: %s' % name)
+    def decorator(f, names=names):
+        return Extension(f, names=names)
     return decorator
+
+
+# Register built-in extensions.
+from . import builtin  # noqa
+del builtin

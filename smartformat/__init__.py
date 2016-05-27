@@ -10,7 +10,7 @@
 
 """
 from .dotnet import DotNetFormatter
-from .smart import ext, SmartFormatter
+from .smart import SmartFormatter
 
 
-__all__ = ['DotNetFormatter', 'ext', 'SmartFormatter']
+__all__ = ['DotNetFormatter', 'SmartFormatter']

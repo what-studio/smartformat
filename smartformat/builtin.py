@@ -15,16 +15,16 @@ import io
 from babel import Locale
 from six import string_types
 
-from .smart import ext
+from .smart import default_extensions, extension
 from .utils import get_plural_tag_index
 
 
-__all__ = ['BUILTIN_EXTENSIONS', 'choose', 'conditional', 'list_', 'plural']
+__all__ = ['choose', 'conditional', 'list_', 'plural']
 
 
-@ext(['plural', 'p', ''], pass_formatter=True)
+@extension(['plural', 'p', ''])
 def plural(formatter, value, name, option, format):
-    """Chooses different text for locale-specific pluralization rules.
+    """Chooses different textension for locale-specific pluralization rules.
 
     Spec: `{:[p[lural]][(locale)]:msgstr0|msgstr1|...}`
 
@@ -63,7 +63,7 @@ def get_choice(value):
     return str(value)
 
 
-@ext(['choose', 'c'], pass_formatter=True)
+@extension(['choose', 'c'])
 def choose(formatter, value, name, option, format):
     """Adds simple logic to format strings.
 
@@ -100,15 +100,15 @@ def choose(formatter, value, name, option, format):
     return formatter.format(words[index], value)
 
 
-@ext(['conditional', 'cond'])
-def conditional(value, name, option, format):
+@extension(['conditional', 'cond'])
+def conditional(formatter, value, name, option, format):
     """SmartFormat for Python doesn't implement it because SmartFormat.NET has
     deprecated the 'conditional' extension.
     """
     raise NotImplementedError('Obsolete extension: conditional')
 
 
-@ext(['list', 'l', ''], pass_formatter=True)
+@extension(['list', 'l', ''])
 def list_(formatter, value, name, option, format):
     """Repeats the items of an array.
 
@@ -156,5 +156,5 @@ def list_(formatter, value, name, option, format):
     return buf.getvalue()
 
 
-#: The list of the built-in extensions.
-BUILTIN_EXTENSIONS = [plural, choose, conditional, list_]
+# Register to the default extensions registry.
+default_extensions.extend([plural, choose, conditional, list_])
