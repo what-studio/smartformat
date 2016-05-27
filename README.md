@@ -7,7 +7,7 @@ pluralizable words for the whole of the natural languages.
 
 This library provides a Python string formatter which imitates
 [SmartFormat.NET][] based on `string.Formatter` in the standard library and
-[Babel][].
+[Babel][] for internationalization.
 
 Currently, this library doesn't implement the full specification yet.  Because
 the localization models in Babel and .NET have some differences with each
