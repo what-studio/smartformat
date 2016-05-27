@@ -1,5 +1,12 @@
 # SmartFormat for Python
 
+[![Build Status]
+(https://img.shields.io/travis/what-studio/smartformat.svg)]
+(https://travis-ci.org/what-studio/smartformat)
+[![Coverage Status]
+(https://img.shields.io/coveralls/what-studio/smartformat.svg)]
+(https://coveralls.io/r/what-studio/smartformat)
+
 [SmartFormat] is a powerful string formatter which was introduced on the .NET
 community.  Especially the formatter is helpful for making an
 internationalization system.  You can make a text template for multiple
