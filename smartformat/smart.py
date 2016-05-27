@@ -9,8 +9,7 @@
 """
 from collections import deque
 import re
-
-from six import PY2
+import string
 
 from .dotnet import DotNetFormatter
 
@@ -33,6 +32,14 @@ FORMAT_SPEC_PATTERN = re.compile(r'''
     )?
     (?P<format>.*)
 ''', re.VERBOSE | re.UNICODE)
+
+
+# :meth:`string.Formatter._vformat` on Python 3.5.1 returns a pair
+# `(format_spec, auto_arg_index)`.  The method is not public but we should
+# override it to keep nested format specs.
+f = string.Formatter()
+VFORMAT_RETURNS_TUPLE = isinstance(f._vformat('', (), {}, [], 0), tuple)
+del f
 
 
 def parse_format_spec(format_spec):
@@ -85,10 +92,10 @@ class SmartFormatter(DotNetFormatter):
                  recursion_depth, *args, **kwargs):
         if recursion_depth != 2:
             # Don't format recursive format strings such as `{:12{this}34}`.
-            if PY2:
-                return format_string
+            if VFORMAT_RETURNS_TUPLE:
+                return (format_string, False)
             else:
-                return format_string, False
+                return format_string
         base = super(SmartFormatter, self)
         return base._vformat(format_string, _1, _2, _3, 1, *args, **kwargs)
 

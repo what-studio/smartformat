@@ -13,6 +13,8 @@
 import os
 import sys
 
+from six import reraise
+
 
 class ExtensionImporter(object):
     """This importer redirects imports from this submodule to other locations.
@@ -54,7 +56,7 @@ class ExtensionImporter(object):
                 exc_type, exc_value, tb = sys.exc_info()
                 sys.modules.pop(fullname, None)
                 if self.is_important_traceback(realname, tb):
-                    raise (exc_type, exc_value, tb.tb_next)
+                    reraise(exc_type, exc_value, tb.tb_next)
                 continue
             module = sys.modules[fullname] = sys.modules[realname]
             if '.' not in modname:
