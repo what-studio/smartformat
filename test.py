@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from datetime import date
-from enum import Enum
 
 from babel import Locale, UnknownLocaleError
 import pytest
@@ -9,11 +8,14 @@ from smartformat.dotnet import DotNetFormatter
 from smartformat.smart import SmartFormatter
 
 
-class Gender(Enum):
-    """Example enum."""
+class Gender(object):
 
-    male = 0
-    female = 1
+    def __init__(self, name):
+        self.name = name
+
+
+Gender.male = Gender('male')
+Gender.female = Gender('female')
 
 
 class Person(object):
