@@ -9,11 +9,13 @@ This library provides a Python string formatter which imitates
 [SmartFormat.NET][] based on `string.Formatter` in the standard library and
 [Babel][].
 
-Currently, this library doesn't implement the full spec yet.  Because locale
-information in Babel and .NET have some differences with each other.
+Currently, this library doesn't implement the full specification yet.  Because
+the localization models in Babel and .NET have some differences with each
+other.
 
 [SmartFormat]: https://github.com/scottrippey/SmartFormat
 [SmartFormat.NET]: https://github.com/scottrippey/SmartFormat.NET
+[Babel]: http://babel.pocoo.org/
 
 ## Usage
 
