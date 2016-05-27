@@ -84,13 +84,13 @@ class SmartFormatter(DotNetFormatter):
     def _vformat(self, format_string, _1, _2, _3,
                  recursion_depth, *args, **kwargs):
         if recursion_depth != 2:
-            # Don't format recursive format string such as `{:12{this}34}`.
+            # Don't format recursive format strings such as `{:12{this}34}`.
             if PY2:
                 return format_string
             else:
                 return format_string, False
         base = super(SmartFormatter, self)
-        return base._vformat(format_string, _1, _2, _3, 2, *args, **kwargs)
+        return base._vformat(format_string, _1, _2, _3, 1, *args, **kwargs)
 
 
 class Extension(object):
