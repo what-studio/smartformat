@@ -109,3 +109,8 @@ foo
 >>> smart.format(u'{:}', False)
 bar
 ```
+
+The name of a module for SmartFormat extensions should starts with
+`smartformat_`.  They can be imported under `smartformat.ext`.  For example,
+`import smartformat.ext.hello` will import the `smartformat_hello` module
+actually.  Just like `flask.ext`!
