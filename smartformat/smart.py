@@ -10,6 +10,8 @@
 from collections import deque
 import re
 
+from six import PY2
+
 from .dotnet import DotNetFormatter
 
 
@@ -79,13 +81,16 @@ class SmartFormatter(DotNetFormatter):
             field_name = 0
         return super(SmartFormatter, self).get_value(field_name, args, kwargs)
 
-    def _vformat(self, format_string, args, kwargs,
-                 used_args, recursion_depth):
+    def _vformat(self, format_string, _1, _2, _3,
+                 recursion_depth, *args, **kwargs):
         if recursion_depth != 2:
             # Don't format recursive format string such as `{:12{this}34}`.
-            return format_string
+            if PY2:
+                return format_string
+            else:
+                return format_string, False
         base = super(SmartFormatter, self)
-        return base._vformat(format_string, args, kwargs, used_args, 2)
+        return base._vformat(format_string, _1, _2, _3, 2, *args, **kwargs)
 
 
 class Extension(object):
