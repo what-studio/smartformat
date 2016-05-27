@@ -1,13 +1,13 @@
 # SmartFormat for Python
 
-[SmartFormat][] is a powerful string formatter which was introduced on the .NET
+[SmartFormat] is a powerful string formatter which was introduced on the .NET
 community.  Especially the formatter is helpful for making an
 internationalization system.  You can make a text template for multiple
 pluralizable words for the whole of the natural languages.
 
 This library provides a Python string formatter which imitates
-[SmartFormat.NET][] based on `string.Formatter` in the standard library and
-[Babel][] for internationalization.
+[SmartFormat.NET] based on `string.Formatter` in the standard library and
+[Babel] for internationalization.
 
 Currently, this library doesn't implement the full specification yet.  Because
 the localization models in Babel and .NET have some differences with each
@@ -114,3 +114,14 @@ The name of a module for SmartFormat extensions should starts with
 `smartformat_`.  They can be imported under `smartformat.ext`.  For example,
 `import smartformat.ext.hello` will import the `smartformat_hello` module
 actually.  Just like `flask.ext`!
+
+## Authors and Licensing
+
+Written or designed by [Heungsub Lee] and [Chanwoong Kim] at [What! Studio] in
+[Nexon], and distributed under the [BSD 3-Clause] license.
+
+[Heungsub Lee]: http://subl.ee/
+[Chanwoong Kim]: http://chanwoong.kim/
+[What! Studio]: https://github.com/what-studio
+[Nexon]: http://nexon.com/
+[BSD 3-Clause]: http://opensource.org/licenses/BSD-3-Clause
