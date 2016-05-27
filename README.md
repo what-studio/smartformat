@@ -17,6 +17,14 @@ information in Babel and .NET have some differences with each other.
 
 ## Usage
 
+Install via PyPI first:
+
+```console
+$ pip install smartformat
+```
+
+Then use like a `string.Formatter`:
+
 ```python
 >>> from smartformat import SmartFormatter
 >>> smart = SmartFormatter('en_US')
