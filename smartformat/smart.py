@@ -40,12 +40,13 @@ def parse_format_spec(format_spec):
 
 class SmartFormatter(DotNetFormatter):
 
-    def __init__(self, locale=None, register_default=True):
+    def __init__(self, locale=None, extensions=(), register_default=True):
         super(SmartFormatter, self).__init__(locale)
         # Currently implemented only formatter extensions.
         self._extensions = {}
         if register_default:
             self.register(default_extensions)
+        self.register(extensions)
 
     def register(self, extensions):
         """Registers extensions."""
