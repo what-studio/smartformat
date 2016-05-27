@@ -117,11 +117,10 @@ actually.  Just like `flask.ext`!
 
 ## Authors and Licensing
 
-Written or designed by [Heungsub Lee] and [Chanwoong Kim] at [What! Studio] in
-[Nexon], and distributed under the [BSD 3-Clause] license.
+Written or designed by [Heungsub Lee] at [What! Studio] in [Nexon],
+and distributed under the [BSD 3-Clause] license.
 
 [Heungsub Lee]: http://subl.ee/
-[Chanwoong Kim]: http://chanwoong.kim/
 [What! Studio]: https://github.com/what-studio
 [Nexon]: http://nexon.com/
 [BSD 3-Clause]: http://opensource.org/licenses/BSD-3-Clause
