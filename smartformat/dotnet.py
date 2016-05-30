@@ -7,13 +7,13 @@
    :license: BSD, see LICENSE for more details.
 
 """
-import string
-
 from babel import Locale
 from babel.numbers import (
-    format_currency, get_territory_currencies, LC_NUMERIC, NumberPattern)
+    format_currency, get_territory_currencies, NumberPattern)
 from six import string_types, text_type as str
 from valuedispatch import valuedispatch
+
+from .local import LocalFormatter
 
 
 __all__ = ['DotNetFormatter']
@@ -89,17 +89,10 @@ def format_not_implemented_field(spec, *args, **kwargs):
                               'is not implemented yet' % spec)
 
 
-class DotNetFormatter(string.Formatter):
+class DotNetFormatter(LocalFormatter):
     """A string formatter like `String.Format` in .NET Framework."""
 
     _format_field = staticmethod(format_field)
-
-    def __init__(self, locale=None):
-        self.locale = locale
-
-    @property
-    def numeric_locale(self):
-        return self.locale or LC_NUMERIC
 
     def vformat(self, format_string, args, kwargs):
         if not format_string:
