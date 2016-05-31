@@ -18,6 +18,7 @@ from babel.numbers import get_group_symbol, LC_NUMERIC, NumberPattern
 __all__ = ['LocalFormatter']
 
 
+DEFAULT_PREC = 6
 FORMAT_SPEC_PATTERN = re.compile(r'''
     ^
     (?:
@@ -67,6 +68,18 @@ def format_percent(value, prec=0, prefix=None, locale=LC_NUMERIC):
     return pattern.apply(value, locale, force_frac=(prec, prec))
 
 
+def remove_group_symbols(string, locale=LC_NUMERIC):
+    symbol = get_group_symbol(locale)
+    return string.replace(symbol, '')
+
+
+def get_prefix(sign):
+    if not sign or sign == u'-':
+        return (u'', u'-')
+    else:
+        return (sign, u'-')
+
+
 class LocalFormatter(string.Formatter):
     """A formatter which keeps a locale."""
 
@@ -87,6 +100,7 @@ class LocalFormatter(string.Formatter):
         return base.format_field(value, format_spec)
 
     def format_field_by_match(self, value, match):
+        """Formats a field by a Regex match of the format spec pattern."""
         groups = match.groups()
         fill, align, sign, sharp, zero, width, comma, prec, type_ = groups
         if not comma and not prec and type_ not in list('fF%'):
@@ -94,24 +108,26 @@ class LocalFormatter(string.Formatter):
         if math.isnan(value) or math.isinf(value):
             return None
         locale = self.numeric_locale
-        if not sign or sign == u'-':
-            prefix = (u'', u'-')
-        else:
-            prefix = (sign, u'-')
+        # Format number value.
+        prefix = get_prefix(sign)
         if type_ == 'd':
             if prec is not None:
                 raise ValueError('Precision not allowed in '
                                  'integer format specifier')
             string = format_number(value, 0, prefix, locale)
-        elif type_ in 'fF':
-            string = format_number(value, int(prec or 6), prefix, locale)
-        elif type_ == '%':
-            string = format_percent(value, int(prec or 6), prefix, locale)
+        elif type_ in 'fF%':
+            format_ = format_percent if type_ == '%' else format_number
+            string = format_(value, int(prec or DEFAULT_PREC), prefix, locale)
         else:
+            # Don't handle otherwise.
             return None
         if not comma:
-            symbol = get_group_symbol(locale)
-            string = string.replace(symbol, '')
+            # Formatted number always contains group symbols.
+            # Remove the symbols if not required.
+            string = remove_group_symbols(string, locale)
+        if not (fill or align or zero or width):
+            return string
+        # Fix a layout.
         spec = ''.join([fill or u'', align or u'>',
                         zero or u'', width or u''])
         return format(string, spec)
