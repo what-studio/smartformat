@@ -50,6 +50,9 @@ def parse_smart_format_spec(format_spec):
 
 
 class SmartFormatterMixin(LocaleFormatter):
+    """The mixin class which implements SmartFormat specifications.  Extend
+    this with another formatter to deal with non-SmartFormat specifications.
+    """
 
     def __init__(self, locale=None, extensions=(), register_default=True):
         super(SmartFormatterMixin, self).__init__(locale)
@@ -105,6 +108,27 @@ class SmartFormatterMixin(LocaleFormatter):
 
 
 class SmartFormatter(SmartFormatterMixin, DotNetFormatter):
+    """The official SmartFormat formatter.  To imitate SmartFormat.NET, this
+    extends :class:`DotNetFormatter`.  So you can use .NET format
+    specifications also::
+
+       >>> smart = SmartFormatter('hi_IN')
+       >>> print(smart.format(u'{:an item|{:n0} items}', 123456789))
+       12,34,56,789 items
+
+    If you don't want to use .NET format specifications, define your own
+    SmartFormat formatter.  For example, you would choose
+    :class:`NumberFormatter` to format localized numbers::
+
+       class MySmartFormatter(SmartFormatterMixin, NumberFormatter):
+
+           pass
+
+       >>> my_smart = MySmartFormatter('hi_IN')
+       >>> print(my_smart.format(u'{:an item|{:,d} items}', 123456789))
+       12,34,56,789 items
+
+    """
 
     pass
 
