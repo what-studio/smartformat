@@ -90,8 +90,8 @@ class TestNumberFormatter(TestFormatter):
     formatter_class = NumberFormatter
 
     @pytest.mark.parametrize('format_string', [
-        u'{0}', u'{0:f}', u'{0:d}', u'{:%}', u'{:#<f}', u'{:#=f}', u'{:#=30f}',
-        u'{:#=+30f}', u'{:#= 30f}', u'{:=+30f}',
+        u'{0}', u'{0:f}', u'{0:d}', u'{0:%}', u'{0:#<f}', u'{0:#=f}',
+        u'{0:#=30f}', u'{0:#=+30f}', u'{0:#= 30f}', u'{0:=+30f}',
     ])
     @pytest.mark.parametrize('n', [1, 100000, 42, 123456789, 123456.123456,
                                    float('nan'), float('inf')])
