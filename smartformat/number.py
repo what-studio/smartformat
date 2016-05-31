@@ -17,7 +17,7 @@ from babel.numbers import (
     NumberPattern)
 from six import integer_types
 
-from .local import LocalFormatter
+from .locale import LocaleFormatter
 
 
 __all__ = ['NumberFormatter']
@@ -97,7 +97,7 @@ def sign_to_prefix(sign, locale=LC_NUMERIC):
     return (plus_symbol, minus_symbol)
 
 
-class NumberFormatter(LocalFormatter):
+class NumberFormatter(LocaleFormatter):
     """Formats localized numbers by the standard number format types:
     'd', 'f', 'F', '%'.
     """
@@ -109,7 +109,7 @@ class NumberFormatter(LocalFormatter):
                 rv = self.format_number_field_by_match(value, match)
                 if rv is not None:
                     return rv
-        base = super(LocalFormatter, self)
+        base = super(NumberFormatter, self)
         return base.format_field(value, format_spec)
 
     def format_number_field_by_match(self, value, match):
@@ -156,7 +156,6 @@ class NumberFormatter(LocalFormatter):
             # Formatted number always contains group symbols.  Remove the
             # symbols if not required.
             string = remove_group_symbols(string, locale)
-        print(value, prec, prefix, locale, string)
         if not (fill or (not pad_after_prefix and align) or zero or width):
             # No layout spec.
             return string

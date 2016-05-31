@@ -12,9 +12,11 @@ import re
 import string
 
 from .dotnet import DotNetFormatter
+from .locale import LocaleFormatter
 
 
-__all__ = ['default_extensions', 'extension', 'SmartFormatter']
+__all__ = ['default_extensions', 'extension', 'SmartFormatter',
+           'SmartFormatterMixin']
 
 
 #: The extensions to be registered by default.
@@ -22,7 +24,7 @@ default_extensions = deque()
 
 
 NAME_PATTERN = re.compile(r'[a-zA-Z_]*')
-FORMAT_SPEC_PATTERN = re.compile(r'''
+SMART_FORMAT_SPEC_PATTERN = re.compile(r'''
     (?:
         (?P<name>[a-zA-Z_]+)
         (?:
@@ -42,15 +44,15 @@ VFORMAT_RETURNS_TUPLE = isinstance(f._vformat('', (), {}, [], 0), tuple)
 del f
 
 
-def parse_format_spec(format_spec):
-    m = FORMAT_SPEC_PATTERN.match(format_spec)
+def parse_smart_format_spec(format_spec):
+    m = SMART_FORMAT_SPEC_PATTERN.match(format_spec)
     return m.group('name') or u'', m.group('option'), m.group('format')
 
 
-class SmartFormatter(DotNetFormatter):
+class SmartFormatterMixin(LocaleFormatter):
 
     def __init__(self, locale=None, extensions=(), register_default=True):
-        super(SmartFormatter, self).__init__(locale)
+        super(SmartFormatterMixin, self).__init__(locale)
         # Currently implemented only formatter extensions.
         self._extensions = {}
         if register_default:
@@ -67,11 +69,12 @@ class SmartFormatter(DotNetFormatter):
                     self._extensions[name] = deque([ext])
 
     def format_field(self, value, format_spec):
-        name, option, format = parse_format_spec(format_spec)
+        name, option, format = parse_smart_format_spec(format_spec)
         rv = self.eval_extensions(value, name, option, format)
         if rv is not None:
             return rv
-        return super(SmartFormatter, self).format_field(value, format_spec)
+        base = super(SmartFormatterMixin, self)
+        return base.format_field(value, format_spec)
 
     def eval_extensions(self, value, name, option, format):
         """Evaluates extensions in the registry.  If some extension handles the
@@ -86,7 +89,8 @@ class SmartFormatter(DotNetFormatter):
         if not field_name:
             # `{}` is same with `{0}`.
             field_name = 0
-        return super(SmartFormatter, self).get_value(field_name, args, kwargs)
+        base = super(SmartFormatterMixin, self)
+        return base.get_value(field_name, args, kwargs)
 
     def _vformat(self, format_string, _1, _2, _3,
                  recursion_depth, *args, **kwargs):
@@ -96,8 +100,13 @@ class SmartFormatter(DotNetFormatter):
                 return (format_string, False)
             else:
                 return format_string
-        base = super(SmartFormatter, self)
+        base = super(SmartFormatterMixin, self)
         return base._vformat(format_string, _1, _2, _3, 1, *args, **kwargs)
+
+
+class SmartFormatter(SmartFormatterMixin, DotNetFormatter):
+
+    pass
 
 
 class Extension(object):

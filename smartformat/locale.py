@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-   smartformat.local
-   ~~~~~~~~~~~~~~~~~
+   smartformat.locale
+   ~~~~~~~~~~~~~~~~~~
 
    :copyright: (c) 2016 by What! Studio
    :license: BSD, see LICENSE for more details.
@@ -9,17 +9,19 @@
 """
 import string
 
-from babel import Locale
+from babel import default_locale, Locale
 from babel.numbers import LC_NUMERIC
 
 
-__all__ = ['LocalFormatter']
+__all__ = ['LocaleFormatter']
 
 
-class LocalFormatter(string.Formatter):
+class LocaleFormatter(string.Formatter):
     """A formatter which keeps a locale.  It doesn't anything else."""
 
-    def __init__(self, locale):
+    def __init__(self, locale=None):
+        if locale is None:
+            locale = default_locale()
         self.locale = Locale.parse(locale)
 
     @property

@@ -13,7 +13,7 @@ from babel.numbers import (
 from six import string_types, text_type as str
 from valuedispatch import valuedispatch
 
-from .local import LocalFormatter
+from .locale import LocaleFormatter
 from .number import format_number, format_percent
 
 
@@ -83,7 +83,7 @@ def format_not_implemented_field(spec, *args, **kwargs):
                               'is not implemented yet' % spec)
 
 
-class DotNetFormatter(LocalFormatter):
+class DotNetFormatter(LocaleFormatter):
     """A string formatter like `String.Format` in .NET Framework."""
 
     _format_field = staticmethod(format_field)
