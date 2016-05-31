@@ -7,7 +7,6 @@
    :license: BSD, see LICENSE for more details.
 
 """
-import math
 from numbers import Number
 import re
 
@@ -21,6 +20,13 @@ from .locale import LocaleFormatter
 
 
 __all__ = ['NumberFormatter']
+
+
+try:
+    from math import isfinite
+except ImportError:
+    from math import isinf, isnan
+    isfinite = lambda x: not (isinf(x) or isnan(x))
 
 
 DEFAULT_PREC = 6
@@ -103,7 +109,7 @@ class NumberFormatter(LocaleFormatter):
     """
 
     def format_field(self, value, format_spec):
-        if isinstance(value, Number) and math.isfinite(value):
+        if isinstance(value, Number) and isfinite(value):
             match = NUMBER_FORMAT_SPEC_PATTERN.match(format_spec)
             if match is not None:
                 rv = self.format_number_field_by_match(value, match)
