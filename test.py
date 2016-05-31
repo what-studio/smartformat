@@ -5,6 +5,7 @@ from babel import Locale, UnknownLocaleError
 import pytest
 
 from smartformat.dotnet import DotNetFormatter
+from smartformat.local import LocalFormatter
 from smartformat.smart import SmartFormatter
 
 
@@ -82,6 +83,39 @@ class TestFormatter(object):
             locale = None
         formatter = self.formatter_class(locale)
         return formatter.format(*args, **kwargs)
+
+
+class TestLocalFormatter(TestFormatter):
+
+    formatter_class = LocalFormatter
+
+    @pytest.mark.parametrize('format_string', [u'{0}', u'{0:f}', u'{0:d}'])
+    @pytest.mark.parametrize('n', [1, 100000, 42, 123456789, 123456.123456,
+                                   float('nan'), float('inf')])
+    def test_same(self, format_string, n):
+        try:
+            expected = format_string.format(n)
+        except BaseException as exc:
+            with pytest.raises(type(exc)):
+                self.format(format_string, n)
+        else:
+            assert self.format(format_string, n) == expected
+
+    def test_float(self):
+        assert \
+            self.format('hi_IN', u'{0:,.5f}', 123456.123456) == \
+            u'1,23,456.12346'
+        assert \
+            self.format('hi_IN', u'{0:^020,.5f}', 123456.123456) == \
+            u'0001,23,456.12346000'
+# print(f.format(u'{0:^020,.5f}', 123456789.123456789))
+# print(str.format(u'{0:^020,.5f}', 123456789.123456789))
+# print(f.format(u'{0:^+020,.5f}', 123456789.123456789))
+# print(str.format(u'{0:^+020,.5f}', 123456789.123456789))
+# print(f.format(u'{0:^010,.5f}', float('inf')))
+# print(str.format(u'{0:^010,.5f}', float('inf')))
+# print(f.format(u'{0:.10%}', 123456))
+# print(f.format(u'{0:,.10%}', 123456))
 
 
 class TestDotNetFormatter(TestFormatter):

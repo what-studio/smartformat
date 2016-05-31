@@ -49,15 +49,17 @@ def modify_number_pattern(number_pattern, **kwargs):
     return NumberPattern(**kwargs)
 
 
-def format_number(value, prec=0, sign=None, locale=LC_NUMERIC):
+def format_number(value, prec=0, prefix=None, locale=LC_NUMERIC):
     locale = Locale.parse(locale)
     pattern = locale.decimal_formats.get(None)
+    prefix = prefix or pattern.prefix
     return pattern.apply(value, locale, force_frac=(prec, prec))
 
 
-def format_percent(value, prec=0, sign=None, locale=LC_NUMERIC):
+def format_percent(value, prec=0, prefix=None, locale=LC_NUMERIC):
     locale = Locale.parse(locale)
     pattern = locale.percent_formats.get(None)
+    prefix = prefix or pattern.prefix
     pos_suffix, neg_suffix = pattern.suffix
     suffix = (pos_suffix.lstrip(), neg_suffix.lstrip())
     pattern = modify_number_pattern(pattern, prefix=prefix, suffix=suffix)
@@ -89,19 +91,23 @@ class LocalFormatter(string.Formatter):
         if not comma:
             return None
         locale = self.numeric_locale
+        if not sign or sign == u'-':
+            prefix = (u'', u'-')
+        else:
+            prefix = (sign, u'-')
         if type_ == 'd':
             if prec is not None:
                 raise ValueError('Precision not allowed in '
                                  'integer format specifier')
-            string = format_number(value, 0, locale)
+            string = format_number(value, 0, prefix, locale)
         elif type_ in 'fF':
             try:
-                string = format_number(value, int(prec or 0), locale)
+                string = format_number(value, int(prec or 0), prefix, locale)
             except decimal.InvalidOperation:
                 return None
         elif type_ == '%':
             try:
-                string = format_percent(value, int(prec or 0), locale)
+                string = format_percent(value, int(prec or 0), prefix, locale)
             except decimal.InvalidOperation:
                 return None
         else:
@@ -111,12 +117,12 @@ class LocalFormatter(string.Formatter):
         return format(string, spec)
 
 
-f = LocalFormatter('hi_IN')
-print(f.format(u'{0:^020,.5f}', 123456789.123456789))
-print(str.format(u'{0:^020,.5f}', 123456789.123456789))
-print(f.format(u'{0:^+020,.5f}', 123456789.123456789))
-print(str.format(u'{0:^+020,.5f}', 123456789.123456789))
-print(f.format(u'{0:^010,.5f}', float('inf')))
-print(str.format(u'{0:^010,.5f}', float('inf')))
-print(f.format(u'{0:.10%}', 123456))
-print(f.format(u'{0:,.10%}', 123456))
+# f = LocalFormatter('hi_IN')
+# print(f.format(u'{0:^020,.5f}', 123456789.123456789))
+# print(str.format(u'{0:^020,.5f}', 123456789.123456789))
+# print(f.format(u'{0:^+020,.5f}', 123456789.123456789))
+# print(str.format(u'{0:^+020,.5f}', 123456789.123456789))
+# print(f.format(u'{0:^010,.5f}', float('inf')))
+# print(str.format(u'{0:^010,.5f}', float('inf')))
+# print(f.format(u'{0:.10%}', 123456))
+# print(f.format(u'{0:,.10%}', 123456))
