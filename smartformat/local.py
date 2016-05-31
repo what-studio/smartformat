@@ -7,12 +7,12 @@
    :license: BSD, see LICENSE for more details.
 
 """
-import decimal
+import math
 import re
 import string
 
 from babel import Locale
-from babel.numbers import LC_NUMERIC, NumberPattern
+from babel.numbers import get_group_symbol, LC_NUMERIC, NumberPattern
 
 
 __all__ = ['LocalFormatter']
@@ -88,7 +88,9 @@ class LocalFormatter(string.Formatter):
     def format_field_by_match(self, value, match):
         groups = match.groups()
         fill, align, sign, sharp, zero, width, comma, prec, type_ = groups
-        if not comma:
+        if not comma and not prec and type_ not in list('fF%'):
+            return None
+        if math.isnan(value) or math.isinf(value):
             return None
         locale = self.numeric_locale
         if not sign or sign == u'-':
@@ -101,18 +103,15 @@ class LocalFormatter(string.Formatter):
                                  'integer format specifier')
             string = format_number(value, 0, prefix, locale)
         elif type_ in 'fF':
-            try:
-                string = format_number(value, int(prec or 0), prefix, locale)
-            except decimal.InvalidOperation:
-                return None
+            string = format_number(value, int(prec or 6), prefix, locale)
         elif type_ == '%':
-            try:
-                string = format_percent(value, int(prec or 0), prefix, locale)
-            except decimal.InvalidOperation:
-                return None
+            string = format_percent(value, int(prec or 6), prefix, locale)
         else:
             return None
-        spec = ''.join([fill or u'', align or u'',
+        if not comma:
+            symbol = get_group_symbol(locale)
+            string = string.replace(symbol, '')
+        spec = ''.join([fill or u'', align or u'>',
                         zero or u'', width or u''])
         return format(string, spec)
 

@@ -108,14 +108,27 @@ class TestLocalFormatter(TestFormatter):
         assert \
             self.format('hi_IN', u'{0:^020,.5f}', 123456.123456) == \
             u'0001,23,456.12346000'
-# print(f.format(u'{0:^020,.5f}', 123456789.123456789))
-# print(str.format(u'{0:^020,.5f}', 123456789.123456789))
-# print(f.format(u'{0:^+020,.5f}', 123456789.123456789))
-# print(str.format(u'{0:^+020,.5f}', 123456789.123456789))
-# print(f.format(u'{0:^010,.5f}', float('inf')))
-# print(str.format(u'{0:^010,.5f}', float('inf')))
-# print(f.format(u'{0:.10%}', 123456))
-# print(f.format(u'{0:,.10%}', 123456))
+        assert \
+            self.format('hi_IN', u'{0:_^20,.5f}', 123456.123456) == \
+            u'___1,23,456.12346___'
+        assert \
+            self.format('hi_IN', u'{0:_<20,.5f}', 123456.123456) == \
+            u'1,23,456.12346______'
+        assert \
+            self.format('hi_IN', u'{0:_>20,.5f}', 123456.123456) == \
+            u'______1,23,456.12346'
+        assert self.format('ru_RU', u'{0:d}', 12345) == u'12345'
+        assert self.format('ru_RU', u'{0:,d}', 12345) == u'12\xa0345'
+        assert self.format('ru_RU', u'{0:%}', 0.12345) == u'12,345000%'
+        assert \
+            self.format('ru_RU', u'{0:020%}', 0.12345) == \
+            u'000000000012,345000%'
+        assert \
+            self.format('ru_RU', u'{0:020,%}', 0.12345) == \
+            u'000000000012,345000%'
+        assert \
+            self.format('ru_RU', u'{0:020,%}', 12345) == \
+            u'0001\xa0234\xa0500,000000%'
 
 
 class TestDotNetFormatter(TestFormatter):
