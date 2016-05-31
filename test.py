@@ -5,7 +5,7 @@ from babel import Locale, UnknownLocaleError
 import pytest
 
 from smartformat.dotnet import DotNetFormatter
-from smartformat.local import LocalFormatter
+from smartformat.number import NumberFormatter
 from smartformat.smart import SmartFormatter
 
 
@@ -85,11 +85,14 @@ class TestFormatter(object):
         return formatter.format(*args, **kwargs)
 
 
-class TestLocalFormatter(TestFormatter):
+class TestNumberFormatter(TestFormatter):
 
-    formatter_class = LocalFormatter
+    formatter_class = NumberFormatter
 
-    @pytest.mark.parametrize('format_string', [u'{0}', u'{0:f}', u'{0:d}'])
+    @pytest.mark.parametrize('format_string', [
+        u'{0}', u'{0:f}', u'{0:d}', u'{:%}', u'{:#<f}', u'{:#=f}', u'{:#=30f}',
+        u'{:#=+30f}', u'{:#= 30f}', u'{:=+30f}',
+    ])
     @pytest.mark.parametrize('n', [1, 100000, 42, 123456789, 123456.123456,
                                    float('nan'), float('inf')])
     def test_same(self, format_string, n):
@@ -124,18 +127,27 @@ class TestLocalFormatter(TestFormatter):
         assert \
             self.format('hi_IN', u'{0:_>20,.5f}', 123456.123456) == \
             u'______1,23,456.12346'
+        assert \
+            self.format('hi_IN', u'{0:_=+20,.5f}', 123456.123456) == \
+            u'+_____1,23,456.12346'
+        assert self.format(u'{0:_=+5d}'.format(12345)) == u'+12345'
+        assert self.format(u'{0:_=+6d}'.format(12345)) == u'+12345'
+        assert self.format(u'{0:_=+7d}'.format(12345)) == u'+_12345'
 
     def test_percent(self):
-        assert self.format('ru_RU', u'{0:%}', 0.12345) == u'12,345000%'
+        assert self.format('ru_RU', u'{0:%}', 0.12345) == u'12,345000\xa0%'
         assert \
             self.format('ru_RU', u'{0:020%}', 0.12345) == \
-            u'000000000012,345000%'
+            u'00000000012,345000\xa0%'
         assert \
             self.format('ru_RU', u'{0:020,%}', 0.12345) == \
-            u'000000000012,345000%'
+            u'00000000012,345000\xa0%'
         assert \
             self.format('ru_RU', u'{0:020,%}', 12345) == \
-            u'0001\xa0234\xa0500,000000%'
+            u'001\xa0234\xa0500,000000\xa0%'
+        assert \
+            self.format('ru_RU', u'{0:=+020,%}', 12345) == \
+            u'+01\xa0234\xa0500,000000\xa0%'
 
 
 class TestDotNetFormatter(TestFormatter):

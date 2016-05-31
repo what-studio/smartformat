@@ -14,6 +14,7 @@ from six import string_types, text_type as str
 from valuedispatch import valuedispatch
 
 from .local import LocalFormatter
+from .number import format_number, format_percent
 
 
 __all__ = ['DotNetFormatter']
@@ -59,23 +60,16 @@ def format_currency_field(__, prec, number, locale):
 def format_number_field(__, prec, number, locale):
     """Formats a number field."""
     prec = NUMBER_DECIMAL_DIGITS if prec is None else int(prec)
-    locale = Locale.parse(locale)
-    pattern = locale.decimal_formats.get(None)
-    return pattern.apply(number, locale, force_frac=(prec, prec))
+    return format_number(number, prec, locale=locale)
 
 
 @format_field.register(u'p')
 def format_percent_field(__, prec, number, locale):
     """Formats a percent field."""
     prec = PERCENT_DECIMAL_DIGITS if prec is None else int(prec)
-    locale = Locale.parse(locale)
     # Percent formats in Babel usually end with '\xa0%' in several languages.
     # But the .NET implementation doesn't insert '\xa0' before '%'.
-    pattern = locale.percent_formats.get(None)
-    pos_suffix, neg_suffix = pattern.suffix
-    suffix = (pos_suffix.lstrip(), neg_suffix.lstrip())
-    pattern = modify_number_pattern(pattern, suffix=suffix)
-    return pattern.apply(number, locale, force_frac=(prec, prec))
+    return format_percent(number, prec, strip_suffix=True, locale=locale)
 
 
 @format_field.register(u'd')
