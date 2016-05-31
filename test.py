@@ -101,6 +101,13 @@ class TestLocalFormatter(TestFormatter):
         else:
             assert self.format(format_string, n) == expected
 
+    def test_decimal(self):
+        assert self.format('ru_RU', u'{0:d}', 12345) == u'12345'
+        assert self.format('ru_RU', u'{0:,d}', 12345) == u'12\xa0345'
+        assert self.format('hi_IN', u'{0:,d}', 123456789) == u'12,34,56,789'
+        assert self.format('hi_IN', u'{0:+,d}', 123456789) == u'+12,34,56,789'
+        assert self.format('hi_IN', u'{0: ,d}', 123456789) == u' 12,34,56,789'
+
     def test_float(self):
         assert \
             self.format('hi_IN', u'{0:,.5f}', 123456.123456) == \
@@ -117,8 +124,8 @@ class TestLocalFormatter(TestFormatter):
         assert \
             self.format('hi_IN', u'{0:_>20,.5f}', 123456.123456) == \
             u'______1,23,456.12346'
-        assert self.format('ru_RU', u'{0:d}', 12345) == u'12345'
-        assert self.format('ru_RU', u'{0:,d}', 12345) == u'12\xa0345'
+
+    def test_percent(self):
         assert self.format('ru_RU', u'{0:%}', 0.12345) == u'12,345000%'
         assert \
             self.format('ru_RU', u'{0:020%}', 0.12345) == \

@@ -52,7 +52,8 @@ def modify_number_pattern(number_pattern, **kwargs):
 def format_number(value, prec=0, prefix=None, locale=LC_NUMERIC):
     locale = Locale.parse(locale)
     pattern = locale.decimal_formats.get(None)
-    prefix = prefix or pattern.prefix
+    if prefix is not None:
+        pattern = modify_number_pattern(pattern, prefix=prefix)
     return pattern.apply(value, locale, force_frac=(prec, prec))
 
 
