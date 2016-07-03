@@ -160,7 +160,8 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format(u'{0:d}', 1234) == u'1234'
         assert self.format(u'{0:d6}', -1234) == u'-001234'
 
-    def test_science(self):
+    def test_scientific(self):
+        # parse_pattern('0.######E+000').apply(1052.0329112756, 'en_US')
         assert \
             self.format('en_US', u'{0:E}', 1052.0329112756) == u'1.052033E+003'
         assert \

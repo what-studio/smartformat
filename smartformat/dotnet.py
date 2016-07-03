@@ -11,7 +11,8 @@ from numbers import Number
 
 from babel import Locale
 from babel.numbers import (
-    format_currency, get_territory_currencies, NumberPattern, parse_pattern)
+    format_currency, format_scientific, get_decimal_symbol,
+    get_territory_currencies, NumberPattern, parse_pattern)
 from six import string_types, text_type as str
 from valuedispatch import valuedispatch
 
@@ -23,6 +24,7 @@ __all__ = ['DotNetFormatter']
 
 NUMBER_DECIMAL_DIGITS = 2
 PERCENT_DECIMAL_DIGITS = 2
+SCIENTIFIC_DECIMAL_DIGITS = 6
 
 
 def modify_number_pattern(number_pattern, **kwargs):
@@ -45,6 +47,7 @@ def format_field(spec, arg, value, locale):
 
 
 @format_field.register(u'c')
+@format_field.register(u'C')
 def format_currency_field(__, prec, number, locale):
     """Formats a currency field."""
     locale = Locale.parse(locale)
@@ -61,6 +64,7 @@ def format_currency_field(__, prec, number, locale):
 
 
 @format_field.register(u'd')
+@format_field.register(u'D')
 def format_decimal_field(__, prec, number, locale):
     """Formats a decimal field:
 
@@ -76,7 +80,19 @@ def format_decimal_field(__, prec, number, locale):
     return format(number, u'0%dd' % prec)
 
 
+@format_field.register(u'e')
+@format_field.register(u'E')
+def format_scientific_field(spec, prec, number, locale):
+    prec = SCIENTIFIC_DECIMAL_DIGITS if prec is None else int(prec)
+    format_ = u'0.%sE+000' % (u'#' * prec)
+    pattern = parse_pattern(format_)
+    decimal_symbol = get_decimal_symbol(locale)
+    string = pattern.apply(number, locale).replace(u'.', decimal_symbol)
+    return string.lower() if spec.islower() else string
+
+
 @format_field.register(u'f')
+@format_field.register(u'F')
 def format_float_field(__, prec, number, locale):
     """Formats a fixed-point field."""
     format_ = u'0.'
@@ -89,6 +105,7 @@ def format_float_field(__, prec, number, locale):
 
 
 @format_field.register(u'n')
+@format_field.register(u'N')
 def format_number_field(__, prec, number, locale):
     """Formats a number field."""
     prec = NUMBER_DECIMAL_DIGITS if prec is None else int(prec)
@@ -98,6 +115,7 @@ def format_number_field(__, prec, number, locale):
 
 
 @format_field.register(u'p')
+@format_field.register(u'P')
 def format_percent_field(__, prec, number, locale):
     """Formats a percent field."""
     prec = PERCENT_DECIMAL_DIGITS if prec is None else int(prec)
@@ -111,10 +129,12 @@ def format_percent_field(__, prec, number, locale):
     return pattern.apply(number, locale, force_frac=(prec, prec))
 
 
-@format_field.register(u'e')
 @format_field.register(u'g')
+@format_field.register(u'G')
 @format_field.register(u'r')
+@format_field.register(u'R')
 @format_field.register(u'x')
+@format_field.register(u'X')
 def format_not_implemented_field(spec, *args, **kwargs):
     raise NotImplementedError('Numeric format specifier %r '
                               'is not implemented yet' % spec)
@@ -145,7 +165,6 @@ class DotNetFormatter(LocalFormatter):
         """
         if format_spec:
             spec, arg = format_spec[0], format_spec[1:]
-            spec = spec.lower()
             arg = arg or None
         else:
             spec = arg = None
