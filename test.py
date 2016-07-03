@@ -213,6 +213,13 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format(u'{0:x4}', 255) == u'00ff'
         assert self.format(u'{0:X4}', -1) == u'00FF'
 
+    def test_custom(self):
+        assert self.format(u'{0:0.##}', 256.583) == u'256.58'
+        assert self.format(u'{0:0.##}', 256.586) == u'256.59'
+        assert self.format(u'{0:0.##}', 256.58) == u'256.58'
+        assert self.format(u'{0:0.##}', 256.5) == u'256.5'
+        assert self.format(u'{0:0.##}', 256.0) == u'256'
+
     def test_unknown_spec(self):
         assert self.format(u'~!{0:\x00}!~', 'Smart') == u'~!Smart!~'
 
