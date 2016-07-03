@@ -11,7 +11,8 @@ from numbers import Number
 
 from babel import Locale
 from babel.numbers import (
-    format_currency, get_territory_currencies, NumberPattern, parse_pattern)
+    format_currency, get_decimal_symbol, get_territory_currencies,
+    NumberPattern, parse_pattern)
 from six import string_types, text_type as str
 from valuedispatch import valuedispatch
 
@@ -76,6 +77,18 @@ def format_decimal_field(__, prec, number, locale):
     return format(number, u'0%dd' % prec)
 
 
+@format_field.register(u'f')
+def format_float_field(__, prec, number, locale):
+    """Formats a fixed-point field."""
+    format_ = u'0.'
+    if prec is None:
+        format_ += u'#' * NUMBER_DECIMAL_DIGITS
+    else:
+        format_ += u'0' * int(prec)
+    pattern = parse_pattern(format_)
+    return pattern.apply(number, locale)
+
+
 @format_field.register(u'n')
 def format_number_field(__, prec, number, locale):
     """Formats a number field."""
@@ -100,7 +113,6 @@ def format_percent_field(__, prec, number, locale):
 
 
 @format_field.register(u'e')
-@format_field.register(u'f')
 @format_field.register(u'g')
 @format_field.register(u'r')
 @format_field.register(u'x')
