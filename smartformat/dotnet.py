@@ -60,6 +60,22 @@ def format_currency_field(__, prec, number, locale):
                            currency_digits=currency_digits)
 
 
+@format_field.register(u'd')
+def format_decimal_field(__, prec, number, locale):
+    """Formats a decimal field:
+
+    .. sourcecode::
+
+       1234 ('D') -> 1234
+       -1234 ('D6') -> -001234
+
+    """
+    prec = 0 if prec is None else int(prec)
+    if number < 0:
+        prec += 1
+    return format(number, u'0%dd' % prec)
+
+
 @format_field.register(u'n')
 def format_number_field(__, prec, number, locale):
     """Formats a number field."""
@@ -83,7 +99,6 @@ def format_percent_field(__, prec, number, locale):
     return pattern.apply(number, locale, force_frac=(prec, prec))
 
 
-@format_field.register(u'd')
 @format_field.register(u'e')
 @format_field.register(u'f')
 @format_field.register(u'g')
