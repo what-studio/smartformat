@@ -7,9 +7,11 @@
    :license: BSD, see LICENSE for more details.
 
 """
+from numbers import Number
+
 from babel import Locale
 from babel.numbers import (
-    format_currency, get_territory_currencies, NumberPattern)
+    format_currency, get_territory_currencies, NumberPattern, parse_pattern)
 from six import string_types, text_type as str
 from valuedispatch import valuedispatch
 
@@ -36,6 +38,9 @@ def modify_number_pattern(number_pattern, **kwargs):
 
 @valuedispatch
 def format_field(spec, arg, value, locale):
+    if isinstance(value, Number):
+        pattern = parse_pattern(spec + arg)
+        return pattern.apply(value, locale)
     return str(value)
 
 
