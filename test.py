@@ -156,6 +156,43 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format('fr_FR', u'{0:c3}', -123.456) == u'-123,456\xa0€'
         assert self.format('ja_JP', u'{0:c3}', -123.456) == u'-￥123.456'
 
+    def test_decimal(self):
+        assert self.format(u'{0:d}', 1234) == u'1234'
+        assert self.format(u'{0:d6}', -1234) == u'-001234'
+
+    def test_science(self):
+        assert \
+            self.format('en_US', u'{0:E}', 1052.0329112756) == u'1.052033E+003'
+        assert \
+            self.format('fr_FR', u'{0:e}', 1052.0329112756) == u'1,052033e+003'
+        assert \
+            self.format('en_US', u'{0:e2}', -1052.0329112756) == u'-1.05e+003'
+        assert \
+            self.format('fr_FR', u'{0:E2}', -1052.0329112756) == u'-1,05E+003'
+
+    def test_float(self):
+        assert self.format('en_US', u'{0:f}', 1234.567) == u'1234.57'
+        assert self.format('de_DE', u'{0:f}', 1234.567) == u'1234,57'
+        assert self.format('en_US', u'{0:f1}', 1234) == u'1234.0'
+        assert self.format('de_DE', u'{0:f1}', 1234) == u'1234,0'
+        assert self.format('en_US', u'{0:f4}', -1234.56) == u'-1234.5600'
+        assert self.format('de_DE', u'{0:f4}', -1234.56) == u'-1234,5600'
+
+    def test_general(self):
+        assert self.format('en_US', u'{0:g}', -123.456) == u'-123.456'
+        assert self.format('sv_SE', u'{0:g}', -123.456) == u'-123,456'
+        assert self.format('en_US', u'{0:g4}', -123.4546) == u'-123.5'
+        assert self.format('sv_SE', u'{0:g4}', -123.4546) == u'-123,5'
+        assert \
+            self.format('en_US', u'{0:G}', -1.234567890e-25) == \
+            u'-1.23456789E-25'
+        assert \
+            self.format('en_US', u'{0:g}', -1.234567890e-25) == \
+            u'-1.23456789e-25'
+        assert \
+            self.format('sv_SE', u'{0:G}', -1.234567890e-25) == \
+            u'-1,23456789E-25'
+
     def test_number(self):
         assert self.format('en_US', u'{0:n}', 1234.567) == u'1,234.57'
         assert self.format('ru_RU', u'{0:n}', 1234.567) == u'1\xa0234,57'
@@ -169,6 +206,12 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format('fr_FR', u'{0:p}', 1) == u'100,00%'
         assert self.format('en_US', u'{0:p1}', -0.39678) == u'-39.7%'
         assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7%'
+
+    def test_hexadecimal(self):
+        assert self.format(u'{0:X}', 255) == u'FF'
+        assert self.format(u'{0:x}', -1) == u'ff'
+        assert self.format(u'{0:x4}', 255) == u'00ff'
+        assert self.format(u'{0:X4}', -1) == u'00FF'
 
     def test_unknown_spec(self):
         assert self.format(u'~!{0:\x00}!~', 'Smart') == u'~!Smart!~'
