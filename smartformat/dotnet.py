@@ -7,6 +7,7 @@
    :license: BSD, see LICENSE for more details.
 
 """
+import math
 from numbers import Number
 
 from babel import Locale
@@ -129,12 +130,21 @@ def format_percent_field(__, prec, number, locale):
     return pattern.apply(number, locale, force_frac=(prec, prec))
 
 
+@format_field.register(u'x')
+@format_field.register(u'X')
+def format_hexadecimal_field(spec, prec, number, locale):
+    """Formats a hexadeciaml field."""
+    if number < 0:
+        # Take two's complement.
+        number &= (1 << (8 * int(math.log(-number, 1 << 8) + 1))) - 1
+    format_ = u'0%d%s' % (int(prec or 0), spec)
+    return format(number, format_)
+
+
 @format_field.register(u'g')
 @format_field.register(u'G')
 @format_field.register(u'r')
 @format_field.register(u'R')
-@format_field.register(u'x')
-@format_field.register(u'X')
 def format_not_implemented_field(spec, *args, **kwargs):
     raise NotImplementedError('Numeric format specifier %r '
                               'is not implemented yet' % spec)
