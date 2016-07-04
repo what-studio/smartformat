@@ -145,10 +145,6 @@ class TestDotNetFormatter(TestFormatter):
     def test_no_format_spec(self):
         assert self.format('en_US', u'{0}', 123) == u'123'
 
-    @pytest.mark.xfail
-    def test_digits(self):
-        assert self.format(u'{0:00}', 1) == u'01'
-
     def test_currency(self):
         assert self.format('en_US', u'{0:c}', 123.456) == u'$123.46'
         assert self.format('fr_FR', u'{0:c}', 123.456) == u'123,46\xa0€'
@@ -179,7 +175,8 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format('en_US', u'{0:f4}', -1234.56) == u'-1234.5600'
         assert self.format('de_DE', u'{0:f4}', -1234.56) == u'-1234,5600'
 
-    def _test_general(self):
+    @pytest.mark.xfail
+    def test_general(self):
         assert self.format('en_US', u'{0:g}', -123.456) == u'-123.456'
         assert self.format('sv_SE', u'{0:g}', -123.456) == u'-123,456'
         assert self.format('en_US', u'{0:g4}', -123.4546) == u'-123.5'
@@ -227,6 +224,7 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format(u'{0:0.##}', 256.5) == u'256.5'
         assert self.format(u'{0:0.##}', 256.0) == u'256'
         assert self.format(u'{0:0}', 12345.6789) == u'12346'
+        assert self.format(u'{0:00}', 1) == u'01'
 
     def test_unknown_spec(self):
         assert self.format(u'~!{0:\x00}!~', 'Smart') == u'~!Smart!~'
