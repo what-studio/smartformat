@@ -41,8 +41,10 @@ def modify_number_pattern(number_pattern, **kwargs):
 
 @valuedispatch
 def format_field(spec, arg, value, locale):
-    if isinstance(value, Number):
-        pattern = parse_pattern(spec + arg)
+    if spec and isinstance(value, Number):
+        if arg:
+            spec += arg
+        pattern = parse_pattern(spec)
         return pattern.apply(value, locale)
     return str(value)
 

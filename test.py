@@ -179,7 +179,7 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format('en_US', u'{0:f4}', -1234.56) == u'-1234.5600'
         assert self.format('de_DE', u'{0:f4}', -1234.56) == u'-1234,5600'
 
-    def test_general(self):
+    def _test_general(self):
         assert self.format('en_US', u'{0:g}', -123.456) == u'-123.456'
         assert self.format('sv_SE', u'{0:g}', -123.456) == u'-123,456'
         assert self.format('en_US', u'{0:g4}', -123.4546) == u'-123.5'
@@ -207,12 +207,18 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format('fr_FR', u'{0:p}', 1) == u'100,00%'
         assert self.format('en_US', u'{0:p1}', -0.39678) == u'-39.7%'
         assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7%'
+        assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7%'
 
     def test_hexadecimal(self):
         assert self.format(u'{0:X}', 255) == u'FF'
         assert self.format(u'{0:x}', -1) == u'ff'
         assert self.format(u'{0:x4}', 255) == u'00ff'
         assert self.format(u'{0:X4}', -1) == u'00FF'
+        assert self.format(u'{0:x}', 0x2045e) == u'2045e'
+        assert self.format(u'{0:X}', 0x2045e) == u'2045E'
+        assert self.format(u'{0:X8}', 0x2045e) == u'0002045E'
+        assert self.format(u'{0:X}', 123456789) == u'75BCD15'
+        assert self.format(u'{0:X2}', 123456789) == u'75BCD15'
 
     def test_custom(self):
         assert self.format(u'{0:0.##}', 256.583) == u'256.58'
@@ -220,6 +226,7 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format(u'{0:0.##}', 256.58) == u'256.58'
         assert self.format(u'{0:0.##}', 256.5) == u'256.5'
         assert self.format(u'{0:0.##}', 256.0) == u'256'
+        assert self.format(u'{0:0}', 12345.6789) == u'12346'
 
     def test_unknown_spec(self):
         assert self.format(u'~!{0:\x00}!~', 'Smart') == u'~!Smart!~'
