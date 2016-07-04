@@ -12,8 +12,8 @@ from numbers import Number
 
 from babel import Locale
 from babel.numbers import (
-    format_currency, format_scientific, get_decimal_symbol,
-    get_territory_currencies, NumberPattern, parse_pattern)
+    format_currency, get_decimal_symbol, get_territory_currencies,
+    NumberPattern, parse_pattern)
 from six import string_types, text_type as str
 from valuedispatch import valuedispatch
 
