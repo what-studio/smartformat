@@ -53,12 +53,12 @@ She got 42 items.
 - [x] `{:c}` - Currency (JPY symbol is different with .NET)
 - [x] `{:c3}` - Currency with specific fractional precision
 - [ ] `{:-c}` - Negative currency
-- [ ] `{:d}`
-- [ ] `{:e}`
-- [ ] `{:f}`
+- [x] `{:d}`
+- [x] `{:e}`
+- [x] `{:f}`
 - [ ] `{:g}`
 - [ ] `{:r}`
-- [ ] `{:x}`
+- [x] `{:x}`
 
 ## SmartFormat Specs
 
