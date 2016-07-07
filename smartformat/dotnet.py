@@ -44,8 +44,12 @@ def format_field(spec, arg, value, locale):
     if spec and isinstance(value, Number):
         if arg:
             spec += arg
-        pattern = parse_pattern(spec)
-        return pattern.apply(value, locale)
+        try:
+            pattern = parse_pattern(spec)
+        except ValueError:
+            return spec
+        else:
+            return pattern.apply(value, locale)
     return str(value)
 
 

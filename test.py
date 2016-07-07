@@ -225,6 +225,8 @@ class TestDotNetFormatter(TestFormatter):
         assert self.format(u'{0:0.##}', 256.0) == u'256'
         assert self.format(u'{0:0}', 12345.6789) == u'12346'
         assert self.format(u'{0:00}', 1) == u'01'
+        assert self.format(u'~!{0:__}!~', 42) == u'~!__!~'
+        assert self.format(u'~!{0:_0.0_}!~', 42) == u'~!_42.0_!~'
 
     def test_unknown_spec(self):
         assert self.format(u'~!{0:\x00}!~', 'Smart') == u'~!Smart!~'
