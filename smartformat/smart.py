@@ -77,7 +77,11 @@ class SmartFormatter(DotNetFormatter):
         """Evaluates extensions in the registry.  If some extension handles the
         format string, it returns a string.  Otherwise, returns ``None``.
         """
-        for ext in self._extensions.get(name, ()):
+        try:
+            exts = self._extensions[name]
+        except KeyError:
+            raise ValueError('No suitable extension: %s' % name)
+        for ext in exts:
             rv = ext(self, value, name, option, format)
             if rv is not None:
                 return rv

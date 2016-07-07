@@ -452,3 +452,10 @@ class TestList(TestSmartFormatter):
         # context.
         with pytest.raises(KeyError):
             self.format(u'{index}', args)
+
+
+class TestError(TestSmartFormatter):
+
+    def test_unknown_ext(self):
+        with pytest.raises(ValueError):
+            self.format(u'{0:__:}', 42)
