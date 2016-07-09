@@ -459,3 +459,6 @@ class TestError(TestSmartFormatter):
     def test_unknown_ext(self):
         with pytest.raises(ValueError):
             self.format(u'{0:__:}', 42)
+
+    def test_brace_escaping(self):
+        assert self.format(u'{{0}} {{{0}}} {{}}', u'Zero') == u'{0} {Zero} {}'
