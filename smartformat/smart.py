@@ -146,9 +146,13 @@ class SmartFormatter(DotNetFormatter):
         return buf.getvalue()
 
     _error_formatters = {
+        # ErrorAction.ThrowError in C# SmartFormat.
         'strict': _format_error_for_strict_error_action,
+        # ErrorAction.OutputErrorInResult in C# SmartFormat.
         'errmsg': _format_error_for_errmsg_error_action,
+        # ErrorAction.Ignore in C# SmartFormat.
         'ignore': _format_error_for_ignore_error_action,
+        # ErrorAction.MaintainTokens in C# SmartFormat.
         'skip': _format_error_for_skip_error_action,
     }
 
