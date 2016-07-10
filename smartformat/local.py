@@ -112,7 +112,7 @@ class LocalFormatter(string.Formatter):
         prefix = get_prefix(sign)
         if type_ == 'd':
             if prec is not None:
-                raise ValueError('Precision not allowed in '
+                raise ValueError('precision not allowed in '
                                  'integer format specifier')
             string = format_number(value, 0, prefix, locale)
         elif type_ in 'fF%':

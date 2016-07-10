@@ -80,7 +80,7 @@ class SmartFormatter(DotNetFormatter):
         try:
             exts = self._extensions[name]
         except KeyError:
-            raise ValueError('No suitable extension: %s' % name)
+            raise ValueError('no suitable extension: %s' % name)
         for ext in exts:
             rv = ext(self, value, name, option, format)
             if rv is not None:
@@ -128,7 +128,7 @@ def extension(names):
     """Makes a function to be an extension."""
     for name in names:
         if not NAME_PATTERN.match(name):
-            raise ValueError('Invalid extension name: %s' % name)
+            raise ValueError('invalid extension name: %s' % name)
     def decorator(f, names=names):
         return Extension(f, names=names)
     return decorator

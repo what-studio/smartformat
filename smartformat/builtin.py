@@ -89,13 +89,13 @@ def choose(formatter, value, name, option, format):
     # used as a default choice.
     if num_words not in (num_choices, num_choices + 1):
         n = num_choices
-        raise ValueError('Specify %d or %d choices' % (n, n + 1))
+        raise ValueError('specify %d or %d choices' % (n, n + 1))
     choice = get_choice(value)
     try:
         index = choices.index(choice)
     except ValueError:
         if num_words == num_choices:
-            raise ValueError('No default choice supplied')
+            raise ValueError('no default choice supplied')
         index = -1
     return formatter.format(words[index], value)
 
@@ -105,7 +105,7 @@ def conditional(formatter, value, name, option, format):
     """SmartFormat for Python doesn't implement it because SmartFormat.NET has
     deprecated the 'conditional' extension.
     """
-    raise NotImplementedError('Obsolete extension: conditional')
+    raise NotImplementedError('obsolete extension: conditional')
 
 
 @extension(['list', 'l', ''])

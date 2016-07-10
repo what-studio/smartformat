@@ -152,7 +152,7 @@ def format_hexadecimal_field(spec, prec, number, locale):
 @format_field.register(u'r')
 @format_field.register(u'R')
 def format_not_implemented_field(spec, *args, **kwargs):
-    raise NotImplementedError('Numeric format specifier %r '
+    raise NotImplementedError('numeric format specifier %r '
                               'is not implemented yet' % spec)
 
 
@@ -171,7 +171,7 @@ class DotNetFormatter(LocalFormatter):
         if isinstance(key, string_types):
             key, comma, width = key.partition(u',')
             if comma:
-                raise NotImplementedError('Width specifier after comma '
+                raise NotImplementedError('width specifier after comma '
                                           'is not implemented yet')
         return super(DotNetFormatter, self).get_value(key, args, kwargs)
 
