@@ -8,8 +8,13 @@
 
 """
 from collections import deque
+import io
 import re
 import string
+import sys
+from types import MethodType
+
+from six import reraise, text_type
 
 from .dotnet import DotNetFormatter
 
@@ -49,8 +54,18 @@ def parse_format_spec(format_spec):
 
 class SmartFormatter(DotNetFormatter):
 
-    def __init__(self, locale=None, extensions=(), register_default=True):
+    def __init__(self, locale=None, errors='strict',
+                 extensions=(), register_default=True):
         super(SmartFormatter, self).__init__(locale)
+        # Set error action.
+        try:
+            _format_error = self._error_formatters[errors]
+        except KeyError:
+            raise LookupError('unknown error action name %s' % errors)
+        self.format_error = MethodType(_format_error, self)
+        if errors == 'skip':
+            self.parse = self._parse_for_skip_error_action
+        self.errors = errors
         # Currently implemented only formatter extensions.
         self._extensions = {}
         if register_default:
@@ -71,7 +86,10 @@ class SmartFormatter(DotNetFormatter):
         rv = self.eval_extensions(value, name, option, format)
         if rv is not None:
             return rv
-        return super(SmartFormatter, self).format_field(value, format_spec)
+        try:
+            return super(SmartFormatter, self).format_field(value, format_spec)
+        except:
+            return self.format_error(sys.exc_info())
 
     def eval_extensions(self, value, name, option, format):
         """Evaluates extensions in the registry.  If some extension handles the
@@ -102,6 +120,46 @@ class SmartFormatter(DotNetFormatter):
                 return format_string
         base = super(SmartFormatter, self)
         return base._vformat(format_string, _1, _2, _3, 1, *args, **kwargs)
+
+    def format_error(self, exc_info):
+        raise NotImplementedError('will be set by __init__')
+
+    def _format_error_for_strict_error_action(self, exc_info):
+        reraise(*exc_info)
+
+    def _format_error_for_errmsg_error_action(self, exc_info):
+        __, exc, __ = exc_info
+        return text_type(exc)
+
+    def _format_error_for_ignore_error_action(self, exc_info):
+        return u''
+
+    def _format_error_for_skip_error_action(self, exc_info):
+        __, field_name, format_spec, conversion = self._parsed
+        buf = io.StringIO()
+        buf.write(u'{%s' % field_name)
+        if conversion:
+            buf.write(u'!%s' % conversion)
+        if format_spec:
+            buf.write(u':%s' % format_spec)
+        buf.write(u'}')
+        return buf.getvalue()
+
+    _error_formatters = {
+        'strict': _format_error_for_strict_error_action,
+        'errmsg': _format_error_for_errmsg_error_action,
+        'ignore': _format_error_for_ignore_error_action,
+        'skip': _format_error_for_skip_error_action,
+    }
+
+    def _parse_for_skip_error_action(self, format_string):
+        for parsed in super(SmartFormatter, self).parse(format_string):
+            self._parsed = parsed
+            yield parsed
+            del self._parsed
+
+
+ERROR_ACTIONS = list(SmartFormatter._error_formatters.keys())
 
 
 class Extension(object):

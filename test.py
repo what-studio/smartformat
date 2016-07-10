@@ -3,6 +3,7 @@ from datetime import date
 
 from babel import Locale, UnknownLocaleError
 import pytest
+from six import python_2_unicode_compatible
 
 from smartformat.dotnet import DotNetFormatter
 from smartformat.local import LocalFormatter
@@ -459,6 +460,22 @@ class TestError(TestSmartFormatter):
     def test_unknown_ext(self):
         with pytest.raises(ValueError):
             self.format(u'{0:__:}', 42)
+
+    def test_error_action(self):
+        def s(errors):
+            return SmartFormatter(errors=errors)
+        class ExpectedException(Exception):
+            pass
+        @python_2_unicode_compatible
+        class Error(object):
+            def __str__(self):
+                raise ExpectedException(u'!')
+        error = Error()
+        with pytest.raises(ExpectedException):
+            s('strict').format(u'-{0}-{0:ZZZZ}-', error)
+        assert s('errmsg').format(u'-{0}-{0:ZZZZ}-', error) == u'-!-!-'
+        assert s('ignore').format(u'-{0}-{0:ZZZZ}-', error) == u'---'
+        assert s('skip').format(u'-{0}-{0:ZZZZ}-', error) == u'-{0}-{0:ZZZZ}-'
 
     def test_brace_escaping(self):
         assert self.format(u'{{0}} {{{0}}} {{}}', u'Zero') == u'{0} {Zero} {}'
