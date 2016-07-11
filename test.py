@@ -202,10 +202,9 @@ class TestDotNetFormatter(TestFormatter):
 
     def test_percent(self):
         assert self.format('en_US', u'{0:p}', 1) == u'100.00%'
-        assert self.format('fr_FR', u'{0:p}', 1) == u'100,00%'
+        assert self.format('fr_FR', u'{0:p}', 1) == u'100,00\xa0%'
         assert self.format('en_US', u'{0:p1}', -0.39678) == u'-39.7%'
-        assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7%'
-        assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7%'
+        assert self.format('fr_FR', u'{0:p1}', -0.39678) == u'-39,7\xa0%'
 
     def test_hexadecimal(self):
         assert self.format(u'{0:X}', 255) == u'FF'

@@ -127,12 +127,7 @@ def format_percent_field(__, prec, number, locale):
     """Formats a percent field."""
     prec = PERCENT_DECIMAL_DIGITS if prec is None else int(prec)
     locale = Locale.parse(locale)
-    # Percent formats in Babel usually end with '\xa0%' in several languages.
-    # But the .NET implementation doesn't insert '\xa0' before '%'.
     pattern = locale.percent_formats.get(None)
-    pos_suffix, neg_suffix = pattern.suffix
-    suffix = (pos_suffix.lstrip(), neg_suffix.lstrip())
-    pattern = modify_number_pattern(pattern, suffix=suffix)
     return pattern.apply(number, locale, force_frac=(prec, prec))
 
 
