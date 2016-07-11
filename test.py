@@ -476,6 +476,12 @@ class TestError(TestSmartFormatter):
         assert s('errmsg').format(u'-{0}-{0:ZZZZ}-', error) == u'-!-!-'
         assert s('ignore').format(u'-{0}-{0:ZZZZ}-', error) == u'---'
         assert s('skip').format(u'-{0}-{0:ZZZZ}-', error) == u'-{0}-{0:ZZZZ}-'
+        # No suitable extension.
+        assert s('ignore').format(u'!{0:__:}!', 42) == u'!!'
+        assert \
+            s('errmsg').format(u'!{0:__:}!', 42) == \
+            u'!no suitable extension: __!'
+        assert s('skip').format(u'!{0:__:}!', 42) == u'!{0:__:}!'
 
     def test_brace_escaping(self):
         assert self.format(u'{{0}} {{{0}}} {{}}', u'Zero') == u'{0} {Zero} {}'

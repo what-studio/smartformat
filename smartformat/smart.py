@@ -83,11 +83,12 @@ class SmartFormatter(DotNetFormatter):
 
     def format_field(self, value, format_spec):
         name, option, format = parse_format_spec(format_spec)
-        rv = self.eval_extensions(value, name, option, format)
-        if rv is not None:
-            return rv
         try:
-            return super(SmartFormatter, self).format_field(value, format_spec)
+            rv = self.eval_extensions(value, name, option, format)
+            if rv is not None:
+                return rv
+            base = super(SmartFormatter, self)
+            return base.format_field(value, format_spec)
         except:
             return self.format_error(sys.exc_info())
 
