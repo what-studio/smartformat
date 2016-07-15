@@ -54,8 +54,8 @@ def parse_format_spec(format_spec):
 
 class SmartFormatter(DotNetFormatter):
 
-    def __init__(self, locale=None, errors='strict',
-                 extensions=(), register_default=True):
+    def __init__(self, locale=None, extensions=(), register_default=True,
+                 errors='strict'):
         super(SmartFormatter, self).__init__(locale)
         # Set error action.
         try:
